@@ -5,9 +5,11 @@
 [![types](https://img.shields.io/npm/types/@ragrails/api-playground-react.svg)](https://www.npmjs.com/package/@ragrails/api-playground-react)
 [![license](https://img.shields.io/npm/l/@ragrails/api-playground-react.svg)](./LICENSE)
 
-A lightweight, embeddable React API playground by [RagRails](https://docs.ragrails.com) for interactive API docs, developer portals, SDK docs, and internal tools.
+A lightweight, embeddable React API playground for interactive API docs, developer portals, SDK docs, and internal tools.
 
 Give developers a fast way to understand and test your API without leaving your docs. Add one component and get cURL-powered code snippets, a **Try it out** console, request editing, auth, cURL import, live API responses, and history.
+
+Built by [RagRails](https://docs.ragrails.com).
 
 ## Features
 

@@ -1,0 +1,89 @@
+{
+  "name": "@ragrails/api-playground-react",
+  "version": "0.1.2",
+  "type": "module",
+  "description": "Lightweight embeddable React API playground for interactive API docs, cURL snippets, try-it-out requests, and developer portals.",
+  "keywords": [
+    "api playground",
+    "api client",
+    "api console",
+    "api explorer",
+    "try it out",
+    "interactive api docs",
+    "developer portal",
+    "api documentation",
+    "curl",
+    "curl parser",
+    "request playground",
+    "react api client",
+    "react component",
+    "http client",
+    "rest api",
+    "api testing"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samowolabi/embeddable-api-client.git"
+  },
+  "homepage": "https://github.com/samowolabi/embeddable-api-client#readme",
+  "bugs": {
+    "url": "https://github.com/samowolabi/embeddable-api-client/issues"
+  },
+  "license": "MIT",
+  "sideEffects": [
+    "**/*.css",
+    "./dist/index.js",
+    "./dist/index.cjs"
+  ],
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:lib",
+    "build:app": "tsc -b && vite build",
+    "build:lib": "vite build --config vite.lib.config.ts && npm run build:css && npm run build:inject-css",
+    "build:css": "tailwindcss -i ./src/styles/package.css -o ./dist/styles.css --minify",
+    "build:inject-css": "node scripts/embed-css.mjs",
+    "check": "npm run lint && npm run build:app && npm run build:lib",
+    "lint": "oxlint",
+    "pack:dry": "npm run build:lib && npm pack --dry-run",
+    "prepublishOnly": "npm run check",
+    "preview": "vite preview"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.1",
+    "@tailwindcss/vite": "^4.3.1",
+    "@types/node": "^24.13.2",
+    "@types/prismjs": "^1.26.6",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "oxlint": "^1.69.0",
+    "prismjs": "^1.30.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "tailwindcss": "^4.3.1",
+    "typescript": "~6.0.2",
+    "vite": "^8.1.0",
+    "vite-plugin-dts": "^4.5.4"
+  }
+}

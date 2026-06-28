@@ -1,0 +1,366 @@
+@import "tailwindcss";
+
+/* ── PP Neue Montreal ─────────────────────────────────────────────────────── */
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/ppneuemontreal-thin.woff') format('woff');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/ppneuemontreal-book.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/ppneuemontreal-italic.woff') format('woff');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/ppneuemontreal-medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/ppneuemontreal-semibolditalic.woff') format('woff');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/ppneuemontreal-bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Make PP Neue Montreal the default for Tailwind's font-sans and the
+   font-heading utility used across the shared components. */
+@theme {
+  --font-sans: 'PP Neue Montreal', system-ui, sans-serif;
+  --font-heading: 'PP Neue Montreal', system-ui, sans-serif;
+}
+
+/*
+ * Semantic theme tokens for the shared component library.
+ *
+ * `@theme inline` maps these to Tailwind utilities (bg-surface, text-content,
+ * border-border, bg-primary, hover:bg-primary-hover, …) that resolve the CSS
+ * variables at runtime. The variables themselves are defined per mode below and
+ * scoped to `[data-theme]` (set by ThemeProvider), so they don't touch the
+ * existing landing-page styles, which keep using the :root tokens further down.
+ *
+ * `--primary` and `--bg` are meant to be overridden at runtime by ThemeProvider
+ * (written as inline styles); everything derived from `--primary` re-computes via
+ * color-mix. The default primary is the project accent (#aa3bff).
+ */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-content: var(--text);
+  --color-muted: var(--text-muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-contrast: var(--primary-contrast);
+}
+
+[data-theme="light"] {
+  --bg: #f2f4f7;
+  --surface: #ffffff;
+  --surface-2: #e7ebf3;
+  --border: #d2d7df;
+  --text: #0f1216;
+  --text-muted: #4b5563;
+  --primary: #7855FF;
+  --primary-contrast: #ffffff;
+}
+
+[data-theme="dark"] {
+  --bg: #16171d;
+  --surface: #1f2028;
+  --surface-2: #2a2c36;
+  --border: #2e303a;
+  --text: #f3f4f6;
+  --text-muted: #9ca3af;
+  --primary: #7855FF;
+  --primary-contrast: #ffffff;
+}
+
+[data-theme] {
+  --primary-hover: color-mix(in srgb, var(--primary) 86%, #000000);
+  --primary-soft: color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+/* Skeleton shimmer sweep (see Skeleton component). */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Text shimmer — sweeps a bright band across gradient-clipped text (see Tabs). */
+@keyframes text-shimmer {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+/* Dropdown open — height smoothly extends downward (see MethodSelect).
+   Uses the grid-template-rows 0fr→1fr trick to animate to auto height. */
+@keyframes dropdown-expand {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+}
+
+/* Response reveal — pure fade in, staggered per line so it reads as a shine
+   passing from the top down (see CodeBlock reveal). */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Widget panel reveal — used when Try it/import panels slide into the flow. */
+@keyframes widget-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Prism syntax tokens, themed to our palette (see utils/highlight). */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: var(--text-muted);
+  font-style: italic;
+}
+.token.punctuation {
+  color: var(--text-muted);
+}
+.token.property,
+.token.tag,
+.token.symbol,
+.token.deleted {
+  color: #7aa2f7;
+}
+.token.number {
+  color: #e5c07b;
+}
+.token.boolean,
+.token.null,
+.token.keyword,
+.token.atrule,
+.token.important {
+  color: var(--primary);
+}
+.token.string,
+.token.char,
+.token.attr-name,
+.token.attr-value,
+.token.regex,
+.token.inserted,
+.token.selector {
+  color: #9ece6a;
+}
+.token.operator,
+.token.entity,
+.token.url,
+.token.variable {
+  color: var(--text);
+}
+.token.function,
+.token.class-name {
+  color: #61afef;
+}
+.token.builtin {
+  color: #56b6c2;
+}
+
+/* Light-mode token colors (the defaults above are tuned for dark backgrounds). */
+[data-theme="light"] .token.property,
+[data-theme="light"] .token.tag,
+[data-theme="light"] .token.symbol,
+[data-theme="light"] .token.deleted {
+  color: #0550ae;
+}
+[data-theme="light"] .token.number {
+  color: #953800;
+}
+[data-theme="light"] .token.string,
+[data-theme="light"] .token.char,
+[data-theme="light"] .token.attr-name,
+[data-theme="light"] .token.attr-value,
+[data-theme="light"] .token.regex,
+[data-theme="light"] .token.inserted,
+[data-theme="light"] .token.selector {
+  color: #116329;
+}
+[data-theme="light"] .token.function,
+[data-theme="light"] .token.class-name {
+  color: #1f6feb;
+}
+[data-theme="light"] .token.builtin {
+  color: #0e7490;
+}
+
+/* Tailwind v4 preflight removes the default button cursor — restore it. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+}
+
+/* ── Existing landing-page styles ─────────────────────────────────────────── */
+
+:root {
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #fff;
+  --border: #e5e4e7;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent-border: rgba(170, 59, 255, 0.5);
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  --sans: 'PP Neue Montreal', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: 'PP Neue Montreal', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #16171d;
+    --border: #2e303a;
+    --code-bg: #1f2028;
+    --accent: #c084fc;
+    --accent-bg: rgba(192, 132, 252, 0.15);
+    --accent-border: rgba(192, 132, 252, 0.5);
+    --social-bg: rgba(47, 48, 58, 0.5);
+    --shadow:
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  }
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}
+
+#root {
+  width: 1126px;
+  max-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  border-inline: 1px solid var(--border);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+}
+
+/* Scoped to @layer base so component-level Tailwind utilities override these
+   element styles (otherwise unlayered rules win over utilities). The landing
+   page, which uses no utility classes, still picks them up. */
+@layer base {
+  h1,
+  h2 {
+    font-family: var(--heading);
+    font-weight: 500;
+    color: var(--text-h);
+  }
+
+  h1 {
+    font-size: 56px;
+    letter-spacing: -1.68px;
+    margin: 32px 0;
+    @media (max-width: 1024px) {
+      font-size: 36px;
+      margin: 20px 0;
+    }
+  }
+  h2 {
+    font-size: 24px;
+    line-height: 118%;
+    letter-spacing: -0.24px;
+    margin: 0 0 8px;
+    @media (max-width: 1024px) {
+      font-size: 20px;
+    }
+  }
+  p {
+    margin: 0;
+  }
+
+  code,
+  .counter {
+    font-family: var(--mono);
+    display: inline-flex;
+    border-radius: 4px;
+    color: var(--text-h);
+  }
+
+  code {
+    font-size: 15px;
+    line-height: 135%;
+    padding: 4px 8px;
+    background: var(--code-bg);
+  }
+}

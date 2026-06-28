@@ -1,0 +1,188 @@
+/*
+ * Stylesheet for @ragrails/api-playground-react.
+ * This file is embedded into the package entry at build time and also exported
+ * as `@ragrails/api-playground-react/styles.css` for explicit CSS loading.
+ *
+ * `source(none)` + explicit `@source` limits Tailwind scanning to the widget's
+ * own source, so only the utilities it uses are emitted. We intentionally skip
+ * Tailwind preflight/base so importing this file does not reset host app styles.
+ * Fonts fall back to the system stack — override `--font-heading` / `--font-sans`
+ * for a custom face.
+ */
+@import "tailwindcss/theme" source(none);
+@import "tailwindcss/utilities" source(none);
+@source "../components/ui";
+@source "../features/api-widget";
+
+@theme {
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-content: var(--text);
+  --color-muted: var(--text-muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-contrast: var(--primary-contrast);
+}
+
+[data-theme="light"] {
+  --bg: #f2f4f7;
+  --surface: #ffffff;
+  --surface-2: #e7ebf3;
+  --border: #d2d7df;
+  --text: #0f1216;
+  --text-muted: #4b5563;
+  --primary: #7855ff;
+  --primary-contrast: #ffffff;
+}
+
+[data-theme="dark"] {
+  --bg: #16171d;
+  --surface: #1f2028;
+  --surface-2: #2a2c36;
+  --border: #2e303a;
+  --text: #f3f4f6;
+  --text-muted: #9ca3af;
+  --primary: #7855ff;
+  --primary-contrast: #ffffff;
+}
+
+[data-theme] {
+  --primary-hover: color-mix(in srgb, var(--primary) 86%, #000000);
+  --primary-soft: color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+/* ── Animations ───────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes text-shimmer {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+@keyframes dropdown-expand {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes widget-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Prism syntax tokens (dark defaults) ──────────────────────────────────── */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: var(--text-muted);
+  font-style: italic;
+}
+.token.punctuation {
+  color: var(--text-muted);
+}
+.token.property,
+.token.tag,
+.token.symbol,
+.token.deleted {
+  color: #7aa2f7;
+}
+.token.number {
+  color: #e5c07b;
+}
+.token.boolean,
+.token.null,
+.token.keyword,
+.token.atrule,
+.token.important {
+  color: var(--primary);
+}
+.token.string,
+.token.char,
+.token.attr-name,
+.token.attr-value,
+.token.regex,
+.token.inserted,
+.token.selector {
+  color: #9ece6a;
+}
+.token.operator,
+.token.entity,
+.token.url,
+.token.variable {
+  color: var(--text);
+}
+.token.function,
+.token.class-name {
+  color: #61afef;
+}
+.token.builtin {
+  color: #56b6c2;
+}
+
+/* Light-mode token colors. */
+[data-theme="light"] .token.property,
+[data-theme="light"] .token.tag,
+[data-theme="light"] .token.symbol,
+[data-theme="light"] .token.deleted {
+  color: #0550ae;
+}
+[data-theme="light"] .token.number {
+  color: #953800;
+}
+[data-theme="light"] .token.string,
+[data-theme="light"] .token.char,
+[data-theme="light"] .token.attr-name,
+[data-theme="light"] .token.attr-value,
+[data-theme="light"] .token.regex,
+[data-theme="light"] .token.inserted,
+[data-theme="light"] .token.selector {
+  color: #116329;
+}
+[data-theme="light"] .token.function,
+[data-theme="light"] .token.class-name {
+  color: #1f6feb;
+}
+[data-theme="light"] .token.builtin {
+  color: #0e7490;
+}
+
+/* Restore the button cursor (Tailwind preflight removes it), scoped to the widget. */
+@layer base {
+  [data-theme] button:not(:disabled),
+  [data-theme] [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+}

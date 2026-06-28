@@ -1,7 +1,6 @@
 # @ragrails/api-playground-react
 
 [![npm version](https://img.shields.io/npm/v/@ragrails/api-playground-react.svg)](https://www.npmjs.com/package/@ragrails/api-playground-react)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/%40ragrails%2Fapi-playground-react.svg)](https://bundlephobia.com/package/@ragrails/api-playground-react)
 [![types](https://img.shields.io/npm/types/@ragrails/api-playground-react.svg)](https://www.npmjs.com/package/@ragrails/api-playground-react)
 [![license](https://img.shields.io/npm/l/@ragrails/api-playground-react.svg)](./LICENSE)
 

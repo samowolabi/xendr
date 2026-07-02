@@ -15,7 +15,7 @@ If you find this useful, please [star the repo](https://github.com/ragrails/api-
 ## Features
 
 - **Embeddable API tester**: add an interactive playground to docs, portals, and internal tools.
-- **Multi-language examples**: show cURL, JavaScript, Python, and Go snippets.
+- **Multi-language examples**: show cURL, JavaScript, Python, Go, Node.js, C++, C#, Rust, Java, and PHP snippets.
 - **Try-it-out console**: let developers edit requests and see responses immediately.
 - **cURL import**: paste an existing cURL command and start testing from it.
 - **Headers, body, and auth**: support common request controls out of the box.
@@ -76,7 +76,6 @@ import '@ragrails/api-playground-react/styles.css'
 ## A Complete Example
 
 ```tsx
-import { useState } from 'react'
 import { ApiPlayground } from '@ragrails/api-playground-react'
 
 const initialRequest = `curl -X POST 'https://jsonplaceholder.typicode.com/posts' \\
@@ -84,22 +83,38 @@ const initialRequest = `curl -X POST 'https://jsonplaceholder.typicode.com/posts
   -d '{ "title": "API client", "body": "Live request from the widget", "userId": 1 }'`
 
 export function CreatePostDocs() {
-  const [request, setRequest] = useState(initialRequest)
-
   return (
     <ApiPlayground
-      request={request}
-      onUpdateRequest={setRequest}
+      request={initialRequest}
       title="Create Post"
-      sampleResponse={`{
-  "id": 101,
-  "title": "API client",
-  "body": "Live request from the widget",
-  "userId": 1
-}`}
+      responseExamples={[
+        {
+          status: 201,
+          statusText: 'Created',
+          body: `{
+            "id": 101,
+            "title": "API client",
+            "body": "Live request from the widget",
+            "userId": 1
+          }`,
+        },
+        {
+          status: 400,
+          statusText: 'Bad Request',
+          body: `{
+            "error": "Validation failed",
+            "message": "The title field is required"
+          }`,
+        },
+      ]}
       customization={{
         primary: '#7855ff',
-        background: '#16171d',
+        light: {
+          background: '#f7f7f9',
+        },
+        dark: {
+          background: '#16171d',
+        },
       }}
     />
   )
@@ -113,12 +128,15 @@ export function CreatePostDocs() {
 | `request` | `string` | Required | The cURL request shown and tested by the widget. |
 | `onUpdateRequest` | `(request: string) => void` | `undefined` | Receives the latest cURL request after edits or imports. |
 | `title` | `string` | `undefined` | Optional console heading. Replaces “Try it Out” when set. |
-| `sampleResponse` | `string` | `undefined` | Example response body shown below the snippet. JSON strings are syntax-highlighted. |
+| `responseExamples` | `{ status: number; statusText?: string; body: string }[]` | `undefined` | Documented response examples shown as selectable status-code pills below the request snippet. |
 | `editable` | `boolean` | `true` | Enables or disables editing in the console. |
 | `allowImport` | `boolean` | `true` | Shows or hides the cURL import action. |
-| `customization` | `{ primary?: string; background?: string }` | `undefined` | Overrides the widget's primary color and background. Accepts any CSS color. |
 | `mode` | `'dark' \| 'light' \| 'system'` | `'dark'` | Controls the widget theme. `system` follows the user's OS preference. |
+| `customization` | `{ primary?: string; background?: string; light?: { primary?: string; background?: string }; dark?: { primary?: string; background?: string } }` | `undefined` | Overrides widget colors globally or per mode. |
+| `snippetLanguages` | `SnippetLanguage[]` | All supported languages | Controls which snippet languages appear. The widget preserves the array order. |
 | `syncSnippet` | `boolean` | `false` | When `true`, the snippet follows console edits. |
+| `defaultView` | `'snippet' \| 'console'` | `'snippet'` | Controls the initial view. Use `'console'` to open directly in Try it Out. |
+| `emptyResponseUntilSend` | `boolean` | `false` | When `true`, the console response area stays empty until the first request is sent. |
 
 ## Common Patterns
 
@@ -149,6 +167,27 @@ const [request, setRequest] = useState(curl)
 
 ### Brand customization
 
+Use mode-specific colors when light and dark need different surfaces.
+
+```tsx
+<ApiPlayground
+  request={curl}
+  mode="system"
+  customization={{
+    light: {
+      primary: '#5b3df5',
+      background: '#f7f7f9',
+    },
+    dark: {
+      primary: '#7855ff',
+      background: '#16171d',
+    },
+  }}
+/>
+```
+
+Flat customization is still supported when one palette works across every mode.
+
 ```tsx
 <ApiPlayground
   request={curl}
@@ -156,6 +195,44 @@ const [request, setRequest] = useState(curl)
     primary: '#52b788',
     background: '#101114',
   }}
+/>
+```
+
+### Snippet languages
+
+Choose the languages your users should see. The order you pass is the order they appear in the widget.
+
+```tsx
+<ApiPlayground
+  request={curl}
+  snippetLanguages={['curl', 'javascript', 'python']}
+/>
+```
+
+### Response examples
+
+Show the successful response and common error states directly below the request snippet.
+
+```tsx
+<ApiPlayground
+  request={curl}
+  responseExamples={[
+    {
+      status: 200,
+      statusText: 'OK',
+      body: `{ "id": 1, "name": "Leanne Graham" }`,
+    },
+    {
+      status: 401,
+      statusText: 'Unauthorized',
+      body: `{ "error": "Missing API key" }`,
+    },
+    {
+      status: 500,
+      statusText: 'Server Error',
+      body: `{ "error": "Something went wrong" }`,
+    },
+  ]}
 />
 ```
 
@@ -179,6 +256,8 @@ For protected APIs, users can configure bearer tokens or API key headers directl
 
 When import is enabled, users can paste a cURL request and continue testing from it. This is useful for docs, support flows, onboarding, and internal tools where developers already share API examples as cURL.
 
+Imported requests populate the interactive console, so users can edit, send, and keep testing immediately.
+
 ## Styling
 
 The widget includes its styles automatically. Consumers do not need Tailwind, a Tailwind config, or a required stylesheet import.
@@ -191,7 +270,7 @@ import '@ragrails/api-playground-react/styles.css'
 
 Use that path if your app prefers explicit CSS loading.
 
-The widget is themeable with `mode` and `customization`.
+The widget is themeable with `mode`, shared customization, and mode-aware `customization.light` / `customization.dark` values.
 
 ## TypeScript
 
@@ -211,4 +290,3 @@ import type { ApiPlaygroundProps } from '@ragrails/api-playground-react'
 ## License
 
 MIT
-# api-playground

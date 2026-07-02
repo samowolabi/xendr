@@ -1,17 +1,20 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Button, Card, CodeBlock, Icon } from '@/components/ui';
 import { ApiConsole } from './ApiConsole';
-import { parseCurl } from './curl';
+import { CodePreviewCard } from './CodePreviewCard';
 import { ImportCard } from './ImportCard';
+import { PoweredBySignature } from './PoweredBySignature';
 import { RequestSnippet } from './RequestSnippet';
-import { formatJsonIfPossible } from './format';
-import { generateSnippet } from './snippets';
-import type { WidgetRequest } from './types';
+import { parseCurl } from '@/lib/widget/curl';
+import { formatJsonIfPossible } from '@/lib/widget/format';
+import { generateSnippet } from '@/lib/widget/snippets';
+import type { ApiPlaygroundResponseExample, SnippetLanguage, WidgetRequest } from '@/lib/widget/types';
 
-type ApiPlaygroundPanel = 'idle' | 'console' | 'import';
-type RenderedPanel = 'snippet' | 'console' | 'import' | 'invalid';
+type ApiPlaygroundPanel = 'idle' | 'console' | 'import' | 'code';
+type RenderedPanel = 'snippet' | 'console' | 'import' | 'code' | 'invalid';
 
 export type ApiPlaygroundMode = 'dark' | 'light' | 'system';
+export type ApiPlaygroundDefaultView = 'snippet' | 'console';
 
 /** Resolve the widget's effective theme, following the OS for `'system'`. */
 function useResolvedMode(mode: ApiPlaygroundMode): 'dark' | 'light' {
@@ -33,15 +36,22 @@ function useResolvedMode(mode: ApiPlaygroundMode): 'dark' | 'light' {
   return mode === 'system' ? systemMode : mode;
 }
 
-export interface ApiPlaygroundCustomization {
+export interface ApiPlaygroundThemeCustomization {
   primary?: string;
   background?: string;
+}
+
+export interface ApiPlaygroundCustomization extends ApiPlaygroundThemeCustomization {
+  light?: ApiPlaygroundThemeCustomization;
+  dark?: ApiPlaygroundThemeCustomization;
 }
 
 export interface ApiPlaygroundProps {
   request: string;
   title?: string;
+  /** @deprecated Use `responseExamples` instead. Kept for backward compatibility. */
   sampleResponse?: string;
+  responseExamples?: ApiPlaygroundResponseExample[];
   onUpdateRequest?: (request: string) => void;
   editable?: boolean;
   allowImport?: boolean;
@@ -52,7 +62,66 @@ export interface ApiPlaygroundProps {
    * Default false — the snippet stays pinned to the documented `request`.
    */
   syncSnippet?: boolean;
+  /** Initial widget view. Use `'console'` to open directly in Try it Out. */
+  defaultView?: ApiPlaygroundDefaultView;
+  /** When true, the console response area stays empty until the first send. */
+  emptyResponseUntilSend?: boolean;
+  snippetLanguages?: readonly SnippetLanguage[];
   customization?: ApiPlaygroundCustomization;
+}
+
+function hexToRgb(hex: string): [number, number, number] | null {
+  const normalized = hex.trim().replace(/^#/, '');
+  const value =
+    normalized.length === 3
+      ? normalized.split('').map((char) => char + char).join('')
+      : normalized;
+
+  if (!/^[0-9a-f]{6}$/i.test(value)) return null;
+
+  const int = Number.parseInt(value, 16);
+  return [(int >> 16) & 255, (int >> 8) & 255, int & 255];
+}
+
+function rgbToHex([r, g, b]: [number, number, number]): string {
+  return `#${[r, g, b].map((channel) => Math.round(channel).toString(16).padStart(2, '0')).join('')}`;
+}
+
+function mixHex(base: string, overlay: string, overlayAmount: number): string | null {
+  const baseRgb = hexToRgb(base);
+  const overlayRgb = hexToRgb(overlay);
+  if (!baseRgb || !overlayRgb) return null;
+
+  const mixed = baseRgb.map((channel, index) =>
+    channel * (1 - overlayAmount) + overlayRgb[index] * overlayAmount,
+  ) as [number, number, number];
+
+  return rgbToHex(mixed);
+}
+
+function backgroundThemeVars(background: string, mode: 'dark' | 'light'): React.CSSProperties {
+  const surface = mode === 'dark' ? mixHex(background, '#ffffff', 0.08) : mixHex(background, '#ffffff', 0.78);
+  const surface2 = mode === 'dark' ? mixHex(background, '#ffffff', 0.14) : mixHex(background, '#000000', 0.03);
+  const border = mode === 'dark' ? mixHex(background, '#ffffff', 0.16) : mixHex(background, '#000000', 0.08);
+
+  return {
+    '--bg': background,
+    ...(surface ? { '--surface': surface } : {}),
+    ...(surface2 ? { '--surface-2': surface2 } : {}),
+    ...(border ? { '--border': border } : {}),
+  } as React.CSSProperties;
+}
+
+function resolveCustomization(
+  customization: ApiPlaygroundCustomization | undefined,
+  mode: 'dark' | 'light',
+): ApiPlaygroundThemeCustomization {
+  const modeCustomization = customization?.[mode];
+
+  return {
+    primary: modeCustomization?.primary ?? customization?.primary,
+    background: modeCustomization?.background ?? customization?.background,
+  };
 }
 
 function inferredTitle(request: WidgetRequest): string {
@@ -78,7 +147,7 @@ const InvalidRequest: React.FC<{
           size="sm"
           variant="primary"
           onClick={onTryImport}
-          rightIcon={<Icon name="download" className="h-4 w-4" />}
+          rightIcon={<Icon name="import" className="h-4 w-4" />}
         >
           Import
         </Button>
@@ -96,6 +165,7 @@ const InvalidRequest: React.FC<{
 );
 
 const PANEL_TRANSITION_MS = 240;
+const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
 const PanelTransition: React.FC<{
   panelKey: RenderedPanel;
@@ -108,10 +178,15 @@ const PanelTransition: React.FC<{
   const [height, setHeight] = useState<number | null>(null);
   const [isClipped, setIsClipped] = useState(false);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const outer = outerRef.current;
     const inner = innerRef.current;
-    if (!outer || !inner || previousPanelRef.current === panelKey) return;
+    if (!outer || !inner) return;
+
+    if (previousPanelRef.current === panelKey) {
+      lastHeightRef.current = inner.getBoundingClientRect().height;
+      return;
+    }
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const startHeight = lastHeightRef.current ?? outer.getBoundingClientRect().height;
@@ -129,6 +204,9 @@ const PanelTransition: React.FC<{
     setHeight(startHeight);
 
     const frame = window.requestAnimationFrame(() => {
+      // Force the browser to commit the start height before animating to the
+      // measured end height. Without this, quick panel swaps can coalesce.
+      outer.getBoundingClientRect();
       setHeight(endHeight);
     });
     const timeout = window.setTimeout(() => {
@@ -156,13 +234,13 @@ const PanelTransition: React.FC<{
   return (
     <div
       ref={outerRef}
-      className="transition-[height] duration-[240ms] ease-out"
+      className="w-full transition-[height] duration-[240ms] ease-out"
       style={{
         height: height === null ? undefined : `${height}px`,
         overflow: isClipped ? 'hidden' : undefined,
       }}
     >
-      <div ref={innerRef}>{children}</div>
+      <div ref={innerRef} className="w-full">{children}</div>
     </div>
   );
 };
@@ -171,11 +249,20 @@ function hydrateRequest(
   request: WidgetRequest,
   title?: string,
   sampleResponse?: string,
+  responseExamples?: ApiPlaygroundResponseExample[],
 ): WidgetRequest {
+  const normalizedResponseExamples = responseExamples?.length
+    ? responseExamples.map((example) => ({
+        ...example,
+        body: formatJsonIfPossible(example.body),
+      }))
+    : undefined;
+
   return {
     ...request,
     title: title ?? inferredTitle(request),
-    sampleResponse: sampleResponse ? formatJsonIfPossible(sampleResponse) : undefined,
+    sampleResponse: normalizedResponseExamples ? undefined : sampleResponse ? formatJsonIfPossible(sampleResponse) : undefined,
+    responseExamples: normalizedResponseExamples,
   };
 }
 
@@ -184,15 +271,26 @@ export const ApiPlayground: React.FC<ApiPlaygroundProps> = ({
   request,
   title,
   sampleResponse,
+  responseExamples,
   onUpdateRequest,
   editable = true,
   allowImport = true,
   mode = 'dark',
   syncSnippet = false,
+  defaultView = 'snippet',
+  emptyResponseUntilSend = false,
+  snippetLanguages,
   customization,
 }) => {
   const resolvedMode = useResolvedMode(mode);
-  const [panel, setPanel] = useState<ApiPlaygroundPanel>('idle');
+  const [panel, setPanel] = useState<ApiPlaygroundPanel>(defaultView === 'console' ? 'console' : 'idle');
+  const previousDefaultViewRef = useRef(defaultView);
+
+  useEffect(() => {
+    if (previousDefaultViewRef.current === defaultView) return;
+    previousDefaultViewRef.current = defaultView;
+    setPanel(defaultView === 'console' ? 'console' : 'idle');
+  }, [defaultView]);
 
   // Two separate entities:
   //  • `request` (prop) — the documented request, drives the preview snippet.
@@ -207,15 +305,18 @@ export const ApiPlayground: React.FC<ApiPlaygroundProps> = ({
   // Console entity — always the live cURL.
   const parsedRequest = useMemo(() => {
     const parsed = parseCurl(liveCurl);
-    return parsed ? hydrateRequest(parsed, title, sampleResponse) : null;
-  }, [liveCurl, title, sampleResponse]);
+    return parsed ? hydrateRequest(parsed, title, sampleResponse, responseExamples) : null;
+  }, [liveCurl, title, sampleResponse, responseExamples]);
+  const lastConsoleRequestRef = useRef<WidgetRequest | null>(parsedRequest);
+  if (parsedRequest) lastConsoleRequestRef.current = parsedRequest;
+  const consoleRequest = parsedRequest ?? lastConsoleRequestRef.current;
 
   // Preview entity — the documented `request`, unless `syncSnippet` mirrors live edits.
   const snippetCurl = syncSnippet ? liveCurl : request;
   const snippetRequest = useMemo(() => {
     const parsed = parseCurl(snippetCurl);
-    return parsed ? hydrateRequest(parsed, title, sampleResponse) : null;
-  }, [snippetCurl, title, sampleResponse]);
+    return parsed ? hydrateRequest(parsed, title, sampleResponse, responseExamples) : null;
+  }, [snippetCurl, title, sampleResponse, responseExamples]);
 
   const publishCurl = (nextCurl: string) => {
     setLiveCurl(nextCurl);
@@ -231,35 +332,57 @@ export const ApiPlayground: React.FC<ApiPlaygroundProps> = ({
     setPanel('console');
   };
 
+  const resolvedCustomization = resolveCustomization(customization, resolvedMode);
   const style = {
-    ...(customization?.primary ? { '--primary': customization.primary } : {}),
-    ...(customization?.background ? { '--bg': customization.background } : {}),
+    ...(resolvedCustomization.primary ? { '--primary': resolvedCustomization.primary } : {}),
+    ...(resolvedCustomization.background ? backgroundThemeVars(resolvedCustomization.background, resolvedMode) : {}),
   } as React.CSSProperties;
 
-  const showConsole = panel === 'console' && parsedRequest;
+  const showConsole = panel === 'console' && consoleRequest;
+  const showCode = panel === 'code' && parsedRequest;
   const renderedPanel: RenderedPanel =
-    panel === 'import' ? 'import' : showConsole ? 'console' : snippetRequest ? 'snippet' : 'invalid';
+    panel === 'import'
+      ? 'import'
+      : showCode
+        ? 'code'
+        : showConsole
+          ? 'console'
+          : snippetRequest
+            ? 'snippet'
+            : 'invalid';
 
   return (
-    <div data-theme={resolvedMode} style={style} className="text-content text-left">
+    <div data-theme={resolvedMode} style={style} className="w-full text-content text-left">
       <PanelTransition panelKey={renderedPanel}>
-        <div key={renderedPanel} className="motion-safe:animate-[widget-slide-in_180ms_ease-out]">
+        <div key={renderedPanel} className="w-full">
           {panel === 'import' ? (
             <ImportCard
               onImport={importRequest}
               onCancel={() => setPanel(parsedRequest ? 'console' : 'idle')}
             />
+          ) : showCode ? (
+            <CodePreviewCard
+              request={parsedRequest}
+              onBack={() => setPanel('console')}
+              snippetLanguages={snippetLanguages}
+            />
           ) : showConsole ? (
             <ApiConsole
-              request={parsedRequest}
+              request={consoleRequest}
               onRequestChange={updateRequest}
               title={title}
               editable={editable}
-              onBack={() => setPanel('idle')}
+              onBack={defaultView === 'console' ? undefined : () => setPanel('idle')}
               onImport={allowImport && editable ? () => setPanel('import') : undefined}
+              onCodePreview={() => setPanel('code')}
+              emptyResponseUntilSend={emptyResponseUntilSend}
             />
           ) : snippetRequest ? (
-            <RequestSnippet request={snippetRequest} onTryItOut={() => setPanel('console')} />
+            <RequestSnippet
+              request={snippetRequest}
+              onTryItOut={() => setPanel('console')}
+              snippetLanguages={snippetLanguages}
+            />
           ) : (
             <InvalidRequest
               request={snippetCurl}
@@ -268,18 +391,9 @@ export const ApiPlayground: React.FC<ApiPlaygroundProps> = ({
               onTryImport={() => setPanel('import')}
             />
           )}
+          <PoweredBySignature mode={resolvedMode} />
         </div>
       </PanelTransition>
-      <div className="mt-2 flex justify-end">
-        <a
-          href="https://www.npmjs.com/package/@ragrails/api-playground-react"
-          target="_blank"
-          rel="noreferrer"
-          className="text-[11px] font-medium text-muted/45 transition-colors hover:text-muted"
-        >
-          Build yours with RagRails
-        </a>
-      </div>
     </div>
   );
 };

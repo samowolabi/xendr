@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Button,
   Card,
@@ -9,14 +9,16 @@ import {
   IconButton,
   MethodBadge,
   MethodSelect,
+  ResponseEmptyState,
   Select,
   StatusBadge,
   Tabs,
   TextField,
+  Tooltip,
 } from '@/components/ui';
 import type { HttpMethod } from '@/types';
 import { cn } from '@/lib/cn';
-import { executeWidgetRequest, mockWidgetResponse, widgetErrorResponse } from './executor';
+import { executeWidgetRequest, mockWidgetResponse, widgetErrorResponse } from '@/lib/widget/executor';
 import {
   authFromHeader,
   initialAuth,
@@ -26,19 +28,20 @@ import {
   requestFromParts,
   requestKey,
   syncAuthHeader,
-} from './request-model';
-import type { EditableHeader, RequestParts } from './request-model';
+} from '@/lib/widget/request-model';
+import type { EditableHeader, RequestParts } from '@/lib/widget/request-model';
 import type {
   WidgetAuth,
   WidgetRequest,
   WidgetResponse,
   WidgetSendHandler,
-} from './types';
+} from '@/lib/widget/types';
 
 type RequestTab = 'headers' | 'body' | 'auth';
 type ResponseTab = 'response' | 'history';
 type ResponsePanel = 'body' | 'headers';
 type AuthMode = WidgetAuth['type'];
+type DraftHeader = EditableHeader & { id: string };
 
 export interface ApiConsoleProps {
   request: WidgetRequest;
@@ -48,6 +51,8 @@ export interface ApiConsoleProps {
   editable?: boolean;
   onBack?: () => void;
   onImport?: () => void;
+  onCodePreview?: () => void;
+  emptyResponseUntilSend?: boolean;
   className?: string;
 }
 
@@ -73,6 +78,14 @@ const AUTH_OPTIONS: { id: AuthMode; label: string; className: string }[] = [
   { id: 'apiKey', label: 'API key', className: 'font-semibold text-content hover:bg-surface-2' },
 ];
 
+function headerSignature(headers: EditableHeader[]): string {
+  return JSON.stringify(headers.map(({ key, value, enabled }) => ({ key, value, enabled })));
+}
+
+function stripHeaderIds(headers: DraftHeader[]): EditableHeader[] {
+  return headers.map(({ key, value, enabled }) => ({ key, value, enabled }));
+}
+
 function rowsForBody(body: string): number {
   return Math.max(3, body.split('\n').length);
 }
@@ -95,8 +108,8 @@ const FieldShell: React.FC<{ children: React.ReactNode; className?: string }> = 
 }) => (
   <div
     className={cn(
-      'flex min-h-10 items-center rounded-md border border-transparent bg-surface-2 px-3 text-sm text-content',
-      'focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/20',
+      'flex min-h-10 items-center rounded-md border border-border/35 bg-surface-2 px-3 text-sm text-content',
+      'focus-within:ring-2 focus-within:ring-primary/20',
       className,
     )}
   >
@@ -115,7 +128,7 @@ const ResponsePanelSwitch: React.FC<{
         type="button"
         onClick={() => onChange(item)}
         className={cn(
-          'text-xs font-medium capitalize transition-colors',
+          'text-[12px] font-medium capitalize transition-colors',
           value === item ? 'text-content' : 'text-muted hover:text-content',
         )}
       >
@@ -157,7 +170,7 @@ const RequestBar: React.FC<RequestBarProps> = ({
         onChange={(event) => onUrlChange(event.target.value)}
         readOnly={!editable}
         aria-label="Request URL"
-        className="min-w-0 flex-1 bg-transparent px-2 py-2 font-mono text-[14px] text-muted outline-none read-only:cursor-default"
+        className="min-w-0 flex-1 bg-transparent px-2 py-2 font-mono text-[14px] text-content outline-none read-only:cursor-default"
       />
     </FieldShell>
     <Button
@@ -174,20 +187,19 @@ const RequestBar: React.FC<RequestBarProps> = ({
 );
 
 interface HeaderRowProps {
-  header: EditableHeader;
-  index: number;
+  header: DraftHeader;
   editable: boolean;
-  onUpdate: (index: number, patch: Partial<EditableHeader>) => void;
-  onRemove: (index: number) => void;
+  onUpdate: (id: string, patch: Partial<EditableHeader>) => void;
+  onRemove: (id: string) => void;
 }
 
-const HeaderRow: React.FC<HeaderRowProps> = ({ header, index, editable, onUpdate, onRemove }) => (
+const HeaderRow: React.FC<HeaderRowProps> = ({ header, editable, onUpdate, onRemove }) => (
   <div className="grid grid-cols-[auto_1fr_auto] gap-3 md:grid-cols-[auto_1fr_1fr_auto]">
     <span className="flex h-8 items-center">
       <Checkbox
         size="sm"
         checked={header.enabled}
-        onChange={(checked) => onUpdate(index, { enabled: checked })}
+        onChange={(checked) => onUpdate(header.id, { enabled: checked })}
         disabled={!editable}
         aria-label={`Enable ${header.key}`}
       />
@@ -195,7 +207,7 @@ const HeaderRow: React.FC<HeaderRowProps> = ({ header, index, editable, onUpdate
     <TextField
       size="sm"
       value={header.key}
-      onChange={(event) => onUpdate(index, { key: event.target.value })}
+      onChange={(event) => onUpdate(header.id, { key: event.target.value })}
       readOnly={!editable}
       aria-label="Header name"
       className="font-mono"
@@ -203,7 +215,7 @@ const HeaderRow: React.FC<HeaderRowProps> = ({ header, index, editable, onUpdate
     <TextField
       size="sm"
       value={header.value}
-      onChange={(event) => onUpdate(index, { value: event.target.value })}
+      onChange={(event) => onUpdate(header.id, { value: event.target.value })}
       readOnly={!editable}
       aria-label="Header value"
       containerClassName="col-start-2 md:col-start-auto"
@@ -212,7 +224,7 @@ const HeaderRow: React.FC<HeaderRowProps> = ({ header, index, editable, onUpdate
     <button
       type="button"
       aria-label={`Remove ${header.key}`}
-      onClick={() => onRemove(index)}
+      onClick={() => onRemove(header.id)}
       disabled={!editable}
       className="row-span-2 inline-flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-2 hover:text-content disabled:cursor-not-allowed disabled:opacity-40 md:row-span-1"
     >
@@ -226,27 +238,55 @@ interface BodyEditorProps {
   error: string | null;
   editable: boolean;
   onBodyChange: (body: string) => void;
+  onFormat: () => void;
   onClearError: () => void;
 }
 
-const BodyEditor: React.FC<BodyEditorProps> = ({ body, error, editable, onBodyChange, onClearError }) => (
+const BodyEditor: React.FC<BodyEditorProps> = ({
+  body,
+  error,
+  editable,
+  onBodyChange,
+  onFormat,
+  onClearError,
+}) => (
   <div className="space-y-2">
     {error && <div className="text-xs text-muted">{error}</div>}
-    <textarea
-      value={body}
-      onChange={(event) => {
-        onBodyChange(event.target.value);
-        if (error) onClearError();
-      }}
-      readOnly={!editable}
-      aria-label="Request body"
-      spellCheck={false}
-      rows={rowsForBody(body)}
-      className={cn(
-        'w-full resize-none overflow-hidden rounded-lg border border-border bg-surface-2 p-3 [field-sizing:content]',
-        'font-mono text-[13px] leading-relaxed text-content outline-none placeholder:text-muted read-only:cursor-default',
-      )}
-    />
+    <div className="relative">
+      <textarea
+        value={body}
+        onChange={(event) => {
+          onBodyChange(event.target.value);
+          if (error) onClearError();
+        }}
+        readOnly={!editable}
+        aria-label="Request body"
+        spellCheck={false}
+        rows={rowsForBody(body)}
+        className={cn(
+          'max-h-[300px] w-full resize-none overflow-auto rounded-lg border border-border/35 bg-surface-2 p-3 pr-11 [field-sizing:content]',
+          'font-mono text-[13px] leading-relaxed text-content outline-none placeholder:text-muted read-only:cursor-default',
+          'focus:ring-2 focus:ring-primary/15',
+        )}
+      />
+      <div className="group absolute right-2 top-2">
+        <button
+          type="button"
+          aria-label="Format JSON body"
+          onClick={onFormat}
+          disabled={!editable}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-surface text-muted transition-colors hover:text-content disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <Icon name="magic" className="h-4 w-4" />
+        </button>
+        <div
+          role="tooltip"
+          className="pointer-events-none absolute right-0 top-full z-20 mt-1 whitespace-nowrap rounded-md bg-surface px-2 py-1 text-[11px] font-medium text-content opacity-0 shadow-lg transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
+        >
+          Format JSON
+        </div>
+      </div>
+    </div>
   </div>
 );
 
@@ -296,7 +336,7 @@ const AuthEditor: React.FC<AuthEditorProps> = ({ auth, editable, onChange }) => 
       />
 
       {auth.type === 'none' && (
-        <div className="rounded-lg border border-border bg-surface-2 p-2.5 text-xs text-muted">
+        <div className="rounded-lg bg-surface-2 p-2.5 text-xs text-muted">
           Auth is disabled for this request.
         </div>
       )}
@@ -344,15 +384,16 @@ const AuthEditor: React.FC<AuthEditorProps> = ({ auth, editable, onChange }) => 
 interface RequestContentProps {
   activeTab: RequestTab;
   auth: WidgetAuth;
-  headers: EditableHeader[];
+  headers: DraftHeader[];
   body: string;
   bodyError: string | null;
   editable: boolean;
   onAuthChange: (auth: WidgetAuth) => void;
-  onHeaderUpdate: (index: number, patch: Partial<EditableHeader>) => void;
-  onHeaderRemove: (index: number) => void;
+  onHeaderUpdate: (id: string, patch: Partial<EditableHeader>) => void;
+  onHeaderRemove: (id: string) => void;
   onHeaderAdd: () => void;
   onBodyChange: (body: string) => void;
+  onBodyFormat: () => void;
   onBodyErrorClear: () => void;
 }
 
@@ -368,6 +409,7 @@ const RequestContent: React.FC<RequestContentProps> = ({
   onHeaderRemove,
   onHeaderAdd,
   onBodyChange,
+  onBodyFormat,
   onBodyErrorClear,
 }) => {
   if (activeTab === 'body') {
@@ -377,6 +419,7 @@ const RequestContent: React.FC<RequestContentProps> = ({
         error={bodyError}
         editable={editable}
         onBodyChange={onBodyChange}
+        onFormat={onBodyFormat}
         onClearError={onBodyErrorClear}
       />
     );
@@ -388,11 +431,10 @@ const RequestContent: React.FC<RequestContentProps> = ({
 
   return (
     <div className="space-y-2.5">
-      {headers.map((header, index) => (
+      {headers.map((header) => (
         <HeaderRow
-          key={`${header.key}-${index}`}
+          key={header.id}
           header={header}
-          index={index}
           editable={editable}
           onUpdate={onHeaderUpdate}
           onRemove={onHeaderRemove}
@@ -448,20 +490,28 @@ const ResponseContent: React.FC<ResponseContentProps> = ({ responsePanel, respon
   return (
     <div className="relative p-3">
       <div className="absolute right-5 top-5 z-10 flex items-center gap-1">
-        <IconButton aria-label="Download response" variant="surface" size="sm" onClick={download}>
-          <Icon name="download" size={14} />
-        </IconButton>
-        <IconButton aria-label="Share response" variant="surface" size="sm" onClick={share}>
-          <Icon name="share" size={14} />
-        </IconButton>
-        <CopyButton value={code} size="sm" />
+        <Tooltip content="Download" side="top">
+          <IconButton aria-label="Download response" variant="surface" size="sm" onClick={download}>
+            <Icon name="download" size={14} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip content="Share" side="top">
+          <IconButton aria-label="Share response" variant="surface" size="sm" onClick={share}>
+            <Icon name="share" size={14} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip content="Copy" side="top">
+          <CopyButton value={code} size="sm" />
+        </Tooltip>
       </div>
       <CodeBlock
         code={code}
         language={isBody ? 'json' : 'plain'}
         copyable={false}
         reveal
-        className="pr-28"
+        revealStagger={28}
+        maxHeight="300px"
+        className="pr-4 [&_*]:text-[13px]"
       />
     </div>
   );
@@ -491,7 +541,7 @@ interface HistoryListProps {
 const HistoryList: React.FC<HistoryListProps> = ({ entries, onSelect, onClear }) => {
   if (entries.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border px-6 py-10 text-center">
+      <div className="flex flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border px-6 py-10 text-center">
         <Icon name="restart" className="h-6 w-6 text-muted" />
         <p className="text-sm font-medium text-content">No requests yet</p>
         <p className="text-xs text-muted">Requests you send will show up here.</p>
@@ -566,10 +616,19 @@ export const ApiConsole: React.FC<ApiConsoleProps> = ({
   editable = true,
   onBack,
   onImport,
+  onCodePreview,
+  emptyResponseUntilSend = false,
   className,
 }) => {
   const auth = useMemo(() => initialAuth(request), [request]);
-  const headers = useMemo(() => initialHeaders(request, auth), [request, auth]);
+  const initialHeaderRows = useMemo(() => initialHeaders(request, auth), [request, auth]);
+  const nextHeaderIdRef = useRef(0);
+  const lastPublishedHeaderSignatureRef = useRef<string | null>(null);
+  const createDraftHeaders = (headers: EditableHeader[]): DraftHeader[] =>
+    headers.map((header) => ({ ...header, id: `header-${nextHeaderIdRef.current++}` }));
+  const [draftHeaders, setDraftHeaders] = useState<DraftHeader[]>(() =>
+    createDraftHeaders(initialHeaderRows),
+  );
   const body = formatJsonBodyOrOriginal(request.body ?? DEFAULT_BODY);
   const requestBody = request.body ?? '';
   const [requestTab, setRequestTab] = useState<RequestTab>('body');
@@ -579,11 +638,26 @@ export const ApiConsole: React.FC<ApiConsoleProps> = ({
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [bodyError, setBodyError] = useState<string | null>(null);
   const [selectedResponse, setSelectedResponse] = useState<WidgetResponse | null>(null);
+  const [draftMethod, setDraftMethod] = useState(request.method);
+  const [draftUrl, setDraftUrl] = useState(request.url);
   const responseCardRef = useRef<HTMLDivElement>(null);
   const fallbackResponse = useMemo(() => mockWidgetResponse(request), [request]);
 
+  useEffect(() => {
+    setDraftMethod(request.method);
+    setDraftUrl(request.url);
+  }, [request.method, request.url]);
+
+  useEffect(() => {
+    const incomingSignature = headerSignature(initialHeaderRows);
+    if (incomingSignature === lastPublishedHeaderSignatureRef.current) return;
+    setDraftHeaders(createDraftHeaders(initialHeaderRows));
+  }, [initialHeaderRows]);
+
   // Keep the last real response visible; only fall back before anything is sent.
   const displayedResponse = selectedResponse ?? fallbackResponse;
+  const showEmptyResponse = emptyResponseUntilSend && !selectedResponse;
+  const headers = draftHeaders;
   const enabledHeaderCount = headers.filter((header) => header.enabled).length;
   const requestTabs = REQUEST_TABS.map((tab) =>
     tab.id === 'headers' ? { ...tab, badge: enabledHeaderCount } : tab,
@@ -591,28 +665,44 @@ export const ApiConsole: React.FC<ApiConsoleProps> = ({
 
   const emitRequestChange = (parts: Partial<RequestParts>) => {
     if (!editable) return;
+    const nextHeaders = parts.headers ?? stripHeaderIds(headers);
     const nextRequest = requestFromParts(request, {
-      method: request.method,
-      url: request.url,
+      method: draftMethod,
+      url: draftUrl,
       body: requestBody,
       auth,
-      headers,
       ...parts,
+      headers: nextHeaders,
     });
+    lastPublishedHeaderSignatureRef.current = headerSignature(
+      initialHeaders(nextRequest, nextRequest.auth ?? { type: 'none' }),
+    );
     onRequestChange?.(nextRequest);
   };
 
   const changeAuth = (nextAuth: WidgetAuth) => {
+    const nextHeaders = syncAuthHeader(stripHeaderIds(headers), nextAuth, auth);
+    setDraftHeaders(createDraftHeaders(nextHeaders));
     emitRequestChange({
       auth: nextAuth,
-      headers: syncAuthHeader(headers, nextAuth, auth),
+      headers: nextHeaders,
     });
   };
 
-  const updateHeader = (index: number, patch: Partial<EditableHeader>) => {
-    const previousHeader = headers[index];
-    const nextHeaders = headers.map((header, i) => (i === index ? { ...header, ...patch } : header));
-    const nextHeader = nextHeaders[index];
+  const changeMethod = (method: HttpMethod) => {
+    setDraftMethod(method);
+    emitRequestChange({ method });
+  };
+
+  const changeUrl = (url: string) => {
+    setDraftUrl(url);
+    emitRequestChange({ url });
+  };
+
+  const updateHeader = (id: string, patch: Partial<EditableHeader>) => {
+    const previousHeader = headers.find((header) => header.id === id);
+    const nextHeaders = headers.map((header) => (header.id === id ? { ...header, ...patch } : header));
+    const nextHeader = nextHeaders.find((header) => header.id === id);
     const nextAuth =
       nextHeader &&
       ((previousHeader && isAuthHeader(previousHeader, auth)) ||
@@ -623,31 +713,37 @@ export const ApiConsole: React.FC<ApiConsoleProps> = ({
           : { type: 'none' as const }
         : auth;
 
+    setDraftHeaders(nextHeaders);
     emitRequestChange({ auth: nextAuth, headers: nextHeaders });
   };
 
-  const removeHeader = (index: number) => {
-    const removedHeader = headers[index];
+  const removeHeader = (id: string) => {
+    const removedHeader = headers.find((header) => header.id === id);
     const nextAuth =
       removedHeader &&
       (isAuthHeader(removedHeader, auth) || isSameHeaderKey(removedHeader.key, AUTH_HEADER_KEY))
         ? { type: 'none' as const }
         : auth;
+    const nextHeaders = headers.filter((header) => header.id !== id);
 
+    setDraftHeaders(nextHeaders);
     emitRequestChange({
       auth: nextAuth,
-      headers: headers.filter((_, i) => i !== index),
+      headers: nextHeaders,
     });
   };
 
   const addHeader = () => {
-    emitRequestChange({ headers: [...headers, { key: '', value: '', enabled: true }] });
+    setDraftHeaders([
+      ...headers,
+      { id: `header-${nextHeaderIdRef.current++}`, key: '', value: '', enabled: true },
+    ]);
   };
 
   const send = async () => {
     const sentRequest = requestFromParts(request, {
-      method: request.method,
-      url: request.url,
+      method: draftMethod,
+      url: draftUrl,
       body: requestBody,
       auth,
       headers,
@@ -660,9 +756,14 @@ export const ApiConsole: React.FC<ApiConsoleProps> = ({
     setSelectedResponse(response);
     setResponseTab('response');
     window.requestAnimationFrame(() => {
-      responseCardRef.current?.scrollIntoView({
+      const responseCard = responseCardRef.current;
+      if (!responseCard) return;
+
+      const top = responseCard.getBoundingClientRect().top + window.scrollY;
+      const target = top - window.innerHeight / 2;
+      window.scrollTo({
+        top: Math.max(0, target),
         behavior: 'smooth',
-        block: 'center',
       });
     });
     setHistory((previous) => {
@@ -689,7 +790,7 @@ export const ApiConsole: React.FC<ApiConsoleProps> = ({
   };
 
   return (
-    <div className={cn('space-y-3', className)}>
+    <div className={cn('w-full space-y-3', className)}>
       <Card flush>
         <div className="p-3">
           <div className="mb-4 flex items-center justify-between gap-3">
@@ -708,49 +809,50 @@ export const ApiConsole: React.FC<ApiConsoleProps> = ({
                 {title ?? 'Try it Out'}
               </div>
             </div>
-            {editable && onImport && (
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={onImport}
-                leftIcon={<Icon name="download" className="h-4 w-4" />}
-              >
-                Import
-              </Button>
-            )}
+            <div className="flex shrink-0 items-center gap-0.5">
+              {onCodePreview && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={onCodePreview}
+                  leftIcon={<Icon name="code" className="h-4 w-4" />}
+                >
+                  Code
+                </Button>
+              )}
+              {editable && onImport && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={onImport}
+                  leftIcon={<Icon name="import" className="h-4 w-4" />}
+                >
+                  Import
+                </Button>
+              )}
+            </div>
           </div>
 
           <RequestBar
-            method={request.method}
-            url={request.url}
+            method={draftMethod}
+            url={draftUrl}
             isSending={isSending}
             editable={editable}
-            onMethodChange={(method) => emitRequestChange({ method })}
-            onUrlChange={(url) => emitRequestChange({ url })}
+            onMethodChange={changeMethod}
+            onUrlChange={changeUrl}
             onSend={send}
           />
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-y border-border px-3">
+        <div className="border-y border-border px-3">
           <Tabs
             items={requestTabs}
             activeId={requestTab}
             onChange={(id) => setRequestTab(id as RequestTab)}
             className="border-b-0"
           />
-          {requestTab === 'body' && (
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              onClick={formatBody}
-              disabled={!editable}
-              leftIcon={<Icon name="magic" className="h-4 w-4" />}
-            >
-              Format
-            </Button>
-          )}
         </div>
 
         <div className="p-3">
@@ -766,34 +868,41 @@ export const ApiConsole: React.FC<ApiConsoleProps> = ({
             onHeaderRemove={removeHeader}
             onHeaderAdd={addHeader}
             onBodyChange={(nextBody) => emitRequestChange({ body: nextBody })}
+            onBodyFormat={formatBody}
             onBodyErrorClear={() => setBodyError(null)}
           />
         </div>
       </Card>
 
-      <div ref={responseCardRef}>
+      <div ref={responseCardRef} className="w-full">
         <Card flush>
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-3 pt-1">
             <Tabs
               items={RESPONSE_TABS}
               activeId={responseTab}
               onChange={(id) => setResponseTab(id as ResponseTab)}
               className="border-b-0"
             />
-            {responseTab === 'response' && (
-              <ResponsePanelSwitch value={responsePanel} onChange={setResponsePanel} />
-            )}
+            <div className="flex items-center gap-3">
+              {responseTab === 'response' && (
+                <ResponsePanelSwitch value={responsePanel} onChange={setResponsePanel} />
+              )}
+            </div>
           </div>
 
           {responseTab === 'response' ? (
-            <>
-              <div className="flex flex-wrap items-center gap-5 border-b border-border px-3 py-3 text-xs text-muted">
-                <StatusBadge status={displayedResponse.status} statusText={displayedResponse.statusText} />
-                <span>{displayedResponse.timeMs}ms</span>
-                <span>{displayedResponse.size}</span>
-              </div>
-              <ResponseContent responsePanel={responsePanel} response={displayedResponse} />
-            </>
+            showEmptyResponse ? (
+              <ResponseEmptyState />
+            ) : (
+              <>
+                <div className="flex flex-wrap items-center gap-5 border-b border-border px-3 py-2.5 text-xs text-muted">
+                  <StatusBadge status={displayedResponse.status} statusText={displayedResponse.statusText} />
+                  <span>{displayedResponse.timeMs}ms</span>
+                  <span>{displayedResponse.size}</span>
+                </div>
+                <ResponseContent responsePanel={responsePanel} response={displayedResponse} />
+              </>
+            )
           ) : (
             <div className="p-3">
               <HistoryList

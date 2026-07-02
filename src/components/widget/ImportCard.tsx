@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Button, Card, Icon } from '@/components/ui';
 import { cn } from '@/lib/cn';
-import { parseCurl } from './curl';
-import type { WidgetRequest } from './types';
+import { parseCurl } from '@/lib/widget/curl';
+import type { WidgetRequest } from '@/lib/widget/types';
 
 interface ImportCardProps {
   /** Called with the parsed request when a valid cURL command is imported. */
@@ -60,9 +60,9 @@ export const ImportCard: React.FC<ImportCardProps> = ({ onImport, onCancel, clas
           placeholder={PLACEHOLDER}
           aria-label="cURL command"
           className={cn(
-            'w-full resize-none rounded-lg border bg-surface-2 p-3 font-mono text-[13px] leading-relaxed text-content outline-none',
+            'w-full resize-none rounded-lg border border-border/35 bg-surface-2 p-3 font-mono text-[13px] leading-relaxed text-content outline-none',
             'placeholder:text-muted/50 focus:ring-2 focus:ring-primary/20',
-            error ? 'border-red-500/60' : 'border-border focus:border-primary/60',
+            error && 'border-red-500/60',
           )}
         />
         {error && <p className="text-xs text-red-400">{error}</p>}
@@ -71,7 +71,7 @@ export const ImportCard: React.FC<ImportCardProps> = ({ onImport, onCancel, clas
             size="sm"
             onClick={handleImport}
             disabled={!text.trim()}
-            leftIcon={<Icon name="download" className="h-4 w-4" />}
+            leftIcon={<Icon name="import" className="h-4 w-4" />}
           >
             Import
           </Button>

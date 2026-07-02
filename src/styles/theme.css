@@ -1,0 +1,345 @@
+/*
+ * Shared theming layer — single source of truth for the dev app (global.css)
+ * and the shipped package (package.css). Both @import this file so their tokens,
+ * syntax-highlight colors, keyframes, and the button-cursor reset can never
+ * drift apart. Only fonts and app/landing-specific styles live in the hosts.
+ *
+ * Token colors resolve from the NEAREST [data-theme] via CSS variables, so a
+ * dark widget nested inside a light page keeps its dark palette (no ancestor
+ * overrides that leak across nested themes).
+ */
+
+/* Map semantic tokens to Tailwind utilities (bg-surface, text-content, …). */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-content: var(--text);
+  --color-muted: var(--text-muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-contrast: var(--primary-contrast);
+}
+
+[data-theme="light"] {
+  --bg: #f7f7f9;
+  --surface: #ffffff;
+  --surface-2: #f4f6f8;
+  --border: #d2d7df;
+  --text: #0f1216;
+  --text-muted: #374151;
+  --primary: #7855ff;
+  --primary-contrast: #ffffff;
+
+  /* Syntax tokens */
+  --tok-property: #0550ae;
+  --tok-number: #953800;
+  --tok-keyword: #8250df;
+  --tok-string: #116329;
+  --tok-function: #1f6feb;
+  --tok-builtin: #0e7490;
+}
+
+[data-theme="dark"] {
+  --bg: #16171d;
+  --surface: #1f2028;
+  --surface-2: #2a2c36;
+  --border: #2e303a;
+  --text: #f3f4f6;
+  --text-muted: #9ca3af;
+  --primary: #7855ff;
+  --primary-contrast: #ffffff;
+
+  /* Syntax tokens */
+  --tok-property: #7aa2f7;
+  --tok-number: #e5c07b;
+  --tok-keyword: #c678dd;
+  --tok-string: #9ece6a;
+  --tok-function: #61afef;
+  --tok-builtin: #56b6c2;
+}
+
+[data-theme] {
+  --primary-hover: color-mix(in srgb, var(--primary) 86%, #000000);
+  --primary-soft: color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+/* ── Animations ───────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes text-shimmer {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+@keyframes dropdown-expand {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes widget-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Playground shell styles ─────────────────────────────────────────────── */
+.pg-shell {
+  font-family: var(--sans);
+}
+
+.pg-export-button::before {
+  content: '';
+  position: absolute;
+  inset-block: -45%;
+  left: -65%;
+  width: 42%;
+  transform: skewX(-18deg) translateX(0);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--primary-contrast) 24%, transparent),
+    color-mix(in srgb, var(--primary-contrast) 46%, transparent),
+    color-mix(in srgb, var(--primary-contrast) 24%, transparent),
+    transparent
+  );
+  opacity: 0;
+  pointer-events: none;
+  animation: pg-export-shimmer-cycle 4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.pg-export-button {
+  animation: pg-export-pulse 4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.pg-export-button:hover {
+  animation-play-state: paused;
+}
+
+.pg-export-button:hover::before {
+  animation: pg-export-shimmer 2.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes pg-export-shimmer {
+  0% {
+    opacity: 0;
+    transform: skewX(-18deg) translateX(0);
+  }
+  14% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: skewX(-18deg) translateX(430%);
+  }
+}
+
+@keyframes pg-export-shimmer-cycle {
+  0%,
+  58% {
+    opacity: 0;
+    transform: skewX(-18deg) translateX(0);
+  }
+  66% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: skewX(-18deg) translateX(430%);
+  }
+}
+
+@keyframes pg-export-pulse {
+  0%,
+  72%,
+  100% {
+    transform: scale(1);
+  }
+  80% {
+    transform: scale(1.018);
+  }
+  88% {
+    transform: scale(0.995);
+  }
+}
+
+.pg-shell[data-theme='light'] {
+  --bg: #f2f2f2;
+  --surface: #f7f7f7;
+  --surface-2: #ececec;
+  --border: #e3e3e3;
+  --text: #3a3a3a;
+  --text-muted: #767676;
+}
+
+.pg-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  min-height: 0;
+}
+
+.pg-inspector {
+  border-left: 1px solid var(--border);
+}
+
+.pg-canvas {
+  background-color: color-mix(in srgb, var(--bg) 92%, #000000);
+  background-image: radial-gradient(currentColor 1.3px, transparent 1.3px);
+  background-size: 22px 22px;
+  color: color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+.pg-canvas-footer {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transform: translateX(-50%);
+  border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  padding: 8px 11px;
+  color: color-mix(in srgb, var(--text) 94%, transparent);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 10px 26px color-mix(in srgb, #000000 8%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.pg-canvas-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.pg-canvas-footer a:hover {
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.pg-canvas-footer b {
+  color: #f59e0b;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.pg-canvas-footer span {
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.45;
+}
+
+@media (max-width: 1024px) {
+  .pg-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: min-content;
+    overflow-y: auto;
+  }
+
+  .pg-canvas {
+    min-height: 55svh;
+  }
+
+  .pg-inspector {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+}
+
+/* ── Syntax tokens — colors resolve from the nearest [data-theme] via vars. ── */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: var(--text-muted);
+  font-style: italic;
+}
+.token.punctuation {
+  color: var(--text-muted);
+}
+.token.property,
+.token.tag,
+.token.symbol,
+.token.deleted {
+  color: var(--tok-property);
+}
+.token.number {
+  color: var(--tok-number);
+}
+.token.boolean,
+.token.null,
+.token.keyword,
+.token.atrule,
+.token.important {
+  color: var(--tok-keyword);
+}
+.token.string,
+.token.char,
+.token.attr-name,
+.token.attr-value,
+.token.regex,
+.token.inserted,
+.token.selector {
+  color: var(--tok-string);
+}
+.token.operator,
+.token.entity,
+.token.url,
+.token.variable {
+  color: var(--text);
+}
+.token.function,
+.token.class-name {
+  color: var(--tok-function);
+}
+.token.builtin {
+  color: var(--tok-builtin);
+}
+
+/* Restore the button cursor (Tailwind preflight removes it), scoped to themed
+   subtrees so it never touches host-app buttons outside the widget. */
+@layer base {
+  [data-theme] button:not(:disabled),
+  [data-theme] [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+}

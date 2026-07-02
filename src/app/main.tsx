@@ -1,30 +1,28 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import '@/styles/global.css'
-import Landing from '@/features/landing/Landing'
 import { ThemeProvider } from '@/theme'
-import { ComponentPreview, type PreviewSection } from './pages/ComponentPreview'
-import { WidgetDemo } from './pages/WidgetDemo'
+import Embed from './pages/Embed/Embed'
+import Landing from './pages/Landing/Landing'
+import { ComponentLibrary, type ComponentLibrarySection } from './pages/ComponentLibrary/ComponentLibrary'
 
-function previewSection(pathname: string): PreviewSection | null {
-  if (pathname === '/preview' || pathname === '/preview/preview') return 'preview'
-  if (pathname === '/preview/components' || pathname === '/preview/component') return 'components'
-  if (pathname === '/preview/widgets' || pathname === '/preview/widget') return 'widgets'
+function appSection(pathname: string): ComponentLibrarySection | null {
+  if (pathname === '/preview' || pathname === '/preview/playground') return 'preview'
+  if (pathname === '/preview/component') return 'component'
+  if (pathname === '/preview/widget') return 'widget'
   return null
 }
 
-// Simple path-based routing: /preview/* (preview surfaces), /widget (widget demo), else app.
+// Simple path-based routing: /preview is the demo parent, else landing page.
 const path = window.location.pathname.replace(/\/+$/, '')
-const section = previewSection(path)
+const section = appSection(path)
 
 const page =
-  section ? (
+  path === '/embed' ? (
+    <Embed />
+  ) : section ? (
     <ThemeProvider fullscreen>
-      <ComponentPreview section={section} />
-    </ThemeProvider>
-  ) : path === '/widget' ? (
-    <ThemeProvider fullscreen>
-      <WidgetDemo />
+      <ComponentLibrary section={section} />
     </ThemeProvider>
   ) : (
     <Landing />

@@ -22,9 +22,9 @@ const fieldSizes: Record<TextFieldSize, string> = {
 };
 
 const inputSizes: Record<TextFieldSize, string> = {
-  sm: 'py-1.5 text-[12px]',
-  md: 'py-2 text-sm',
-  lg: 'py-2.5 text-base',
+  sm: 'py-1 text-[12px]',
+  md: 'py-1.5 text-sm',
+  lg: 'py-2 text-base',
 };
 
 const labelSizes: Record<TextFieldSize, string> = {
@@ -64,10 +64,10 @@ export const TextField: React.FC<TextFieldProps> = ({
       )}
       <div
         className={cn(
-          'flex items-center border bg-surface-2',
-          'focus-within:border-primary/70 focus-within:ring-2 focus-within:ring-primary/15',
+          'flex items-center border border-border/35 bg-surface-2',
+          'focus-within:ring-2 focus-within:ring-primary/15',
           fieldSizes[size],
-          error ? 'border-red-500' : 'border-border',
+          error && 'border-red-500',
         )}
       >
         {leftSlot}

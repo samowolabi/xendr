@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type CodeLanguage = 'json' | 'bash' | 'javascript' | 'python' | 'go' | 'plain';
+export type CodeLanguage = 'json' | 'bash' | 'javascript' | 'python' | 'go' | 'clike' | 'rust' | 'plain';
 
 type TokenType =
   | 'comment'
@@ -90,12 +90,52 @@ const goPatterns: TokenPattern[] = [
   { type: 'punctuation', pattern: /[()[\]{}.,;:]/y },
 ];
 
+const cLikePatterns: TokenPattern[] = [
+  { type: 'comment', pattern: /\/\/.*|\/\*.*?\*\//y },
+  { type: 'string', pattern: /R"\([\s\S]*?\)"|"""[\s\S]*?"""|'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"/y },
+  {
+    type: 'keyword',
+    pattern:
+      /\b(?:using|import|class|public|private|static|void|var|new|return|if|else|for|while|try|catch|throw|int|string|bool|auto|include|namespace|struct|const|final|null|true|false)\b/y,
+  },
+  {
+    type: 'builtin',
+    pattern:
+      /\b(?:HttpClient|HttpRequest|HttpResponse|HttpMethod|URI|StringContent|Encoding|Console|CURL|CURLcode|std|curl_easy_init|curl_easy_setopt|curl_easy_perform|curl_easy_cleanup|curl_slist_append)\b/y,
+  },
+  { type: 'function', pattern: /\b[A-Za-z_]\w*(?=\s*\()/y },
+  { type: 'number', pattern: /\b\d+(?:\.\d+)?\b/y },
+  { type: 'operator', pattern: /::|->|=>|==|!=|<=|>=|\+\+|--|&&|\|\||[+\-*/%=<>!&|]/y },
+  { type: 'punctuation', pattern: /[#()[\]{}.,;:]/y },
+];
+
+const rustPatterns: TokenPattern[] = [
+  { type: 'comment', pattern: /\/\/.*|\/\*.*?\*\//y },
+  { type: 'string', pattern: /r#"(?:[\s\S]*?)"#|'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"/y },
+  {
+    type: 'keyword',
+    pattern:
+      /\b(?:async|await|let|mut|fn|main|return|if|else|for|while|loop|match|use|mod|pub|struct|enum|impl|trait|where|Self|self|Ok|Err|true|false)\b/y,
+  },
+  {
+    type: 'builtin',
+    pattern:
+      /\b(?:Result|Box|String|str|reqwest|tokio|Client|Method|GET|POST|PUT|PATCH|DELETE|println)\b/y,
+  },
+  { type: 'function', pattern: /\b[A-Za-z_]\w*(?=\s*[!(])/y },
+  { type: 'number', pattern: /\b\d+(?:\.\d+)?\b/y },
+  { type: 'operator', pattern: /::|->|=>|==|!=|<=|>=|\.\?|&&|\|\||[+\-*/%=<>!&|]/y },
+  { type: 'punctuation', pattern: /[#()[\]{}.,;:]/y },
+];
+
 const languagePatterns: Record<Exclude<CodeLanguage, 'plain'>, TokenPattern[]> = {
   json: jsonPatterns,
   bash: bashPatterns,
   javascript: javascriptPatterns,
   python: pythonPatterns,
   go: goPatterns,
+  clike: cLikePatterns,
+  rust: rustPatterns,
 };
 
 function readToken(line: string, start: number, patterns: TokenPattern[]) {

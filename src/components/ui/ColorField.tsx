@@ -19,9 +19,9 @@ export const ColorField: React.FC<ColorFieldProps> = ({ label, value, onChange, 
           {label}
         </label>
       )}
-      <div className="flex items-center gap-2 rounded-lg border border-border bg-surface-2 p-1.5 focus-within:border-primary">
+      <div className="flex items-center gap-1.5 rounded-md border border-border bg-surface-2 p-1 focus-within:border-primary">
         <label
-          className="relative h-7 w-7 shrink-0 overflow-hidden rounded-md border border-border"
+          className="relative h-5 w-5 shrink-0 overflow-hidden rounded border border-border"
           style={{ backgroundColor: value }}
         >
           <input
@@ -37,7 +37,7 @@ export const ColorField: React.FC<ColorFieldProps> = ({ label, value, onChange, 
           value={value}
           onChange={(e) => onChange(e.target.value)}
           spellCheck={false}
-          className="w-full bg-transparent font-mono text-sm uppercase text-content focus:outline-none"
+          className="w-full bg-transparent font-mono text-[13px] uppercase text-content focus:outline-none"
         />
       </div>
     </div>

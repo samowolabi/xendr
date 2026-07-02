@@ -3,7 +3,7 @@ import { cn } from '@/lib/cn';
 
 export interface TabItem {
   id: string;
-  label: string;
+  label: React.ReactNode;
   badge?: string | number;
 }
 
@@ -33,14 +33,22 @@ export const Tabs: React.FC<TabsProps> = ({
   // useLayoutEffect runs before paint, so the indicator never flashes.
   useLayoutEffect(() => {
     const el = btnRefs.current[activeId];
-    if (el) setRect({ left: el.offsetLeft, top: el.offsetTop, width: el.offsetWidth, height: el.offsetHeight });
+    setRect(
+      el
+        ? { left: el.offsetLeft, top: el.offsetTop, width: el.offsetWidth, height: el.offsetHeight }
+        : { left: 0, top: 0, width: 0, height: 0 },
+    );
   }, [activeId, items]);
 
   // Keep it aligned when the container reflows (e.g. window resize).
   useEffect(() => {
     const reposition = () => {
       const el = btnRefs.current[activeId];
-      if (el) setRect({ left: el.offsetLeft, top: el.offsetTop, width: el.offsetWidth, height: el.offsetHeight });
+      setRect(
+        el
+          ? { left: el.offsetLeft, top: el.offsetTop, width: el.offsetWidth, height: el.offsetHeight }
+          : { left: 0, top: 0, width: 0, height: 0 },
+      );
     };
     window.addEventListener('resize', reposition);
     return () => window.removeEventListener('resize', reposition);
@@ -48,10 +56,10 @@ export const Tabs: React.FC<TabsProps> = ({
 
   if (variant === 'segmented') {
     return (
-      <div className={cn('relative inline-flex gap-1 rounded-lg border border-border bg-surface-2 p-1', className)}>
-        {/* Sliding pill */}
+      <div className={cn('relative inline-flex gap-0.5 rounded-lg bg-surface-2/70 p-0.5 ring-1 ring-border/70', className)}>
+        {/* Sliding pill — white "liquid glass" surface (matches the Switch thumb) */}
         <span
-          className="pointer-events-none absolute z-0 rounded-md bg-primary transition-all duration-300 ease-out"
+          className="pointer-events-none absolute z-0 rounded-lg bg-white/95 shadow-sm ring-1 ring-black/[0.06] backdrop-blur-sm transition-all duration-300 ease-out"
           style={{ left: rect.left, top: rect.top, width: rect.width, height: rect.height }}
         />
         {items.map((item) => {
@@ -64,21 +72,24 @@ export const Tabs: React.FC<TabsProps> = ({
               }}
               onClick={() => onChange(item.id)}
               className={cn(
-                'group/seg relative z-10 cursor-pointer rounded-md font-heading transition-colors duration-150',
-                size === 'sm' ? 'px-2.5 py-1 text-[12px]' : 'px-3 py-1.5 text-[14px]',
-                active ? 'text-primary-contrast' : 'text-muted',
+                'group/seg relative z-10 cursor-pointer whitespace-nowrap rounded-[7px] font-heading font-medium transition-colors duration-150',
+                size === 'sm' ? 'px-2.5 py-1 text-[12px]' : 'px-3 py-1.5 text-[13px]',
+                active ? 'text-[#1c1d24]' : 'text-muted hover:text-content',
               )}
             >
-              {/* Inactive label shimmers (gradient clipped to the text) on hover */}
+              {/* Inactive text labels shimmer (gradient clipped to the text) on hover.
+                  Only applies to plain-string labels — the clip-text trick blanks out
+                  non-text labels (e.g. icons), so those just get a color change. */}
               <span
                 className={cn(
                   'relative z-10',
                   !active &&
+                    typeof item.label === 'string' &&
                     'bg-gradient-to-r from-muted via-content to-muted bg-[length:200%_100%] bg-clip-text group-hover/seg:text-transparent group-hover/seg:[animation:text-shimmer_1.2s_linear_1_forwards]',
                 )}
               >
                 {item.label}
-                {item.badge !== undefined && <span className="ml-1.5 opacity-70">{item.badge}</span>}
+                {item.badge !== undefined && <span className="ml-1.5 whitespace-nowrap opacity-70">{item.badge}</span>}
               </span>
             </button>
           );
@@ -99,13 +110,13 @@ export const Tabs: React.FC<TabsProps> = ({
             }}
             onClick={() => onChange(item.id)}
             className={cn(
-              'inline-flex cursor-pointer items-center gap-1.5 font-heading transition-colors duration-150',
-              size === 'sm' ? 'px-2 py-2 text-[12px]' : 'px-3 py-2.5 text-[14px]',
+              'inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap font-heading transition-colors duration-150',
+              size === 'sm' ? 'px-2 py-1.5 text-[12px]' : 'px-3 py-1.5 text-[13px]',
               active ? 'text-content' : 'text-muted hover:text-content',
             )}
           >
             {item.label}
-            {item.badge !== undefined && <span className="text-xs text-muted">{item.badge}</span>}
+            {item.badge !== undefined && <span className="whitespace-nowrap text-xs text-muted">{item.badge}</span>}
           </button>
         );
       })}

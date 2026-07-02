@@ -1,0 +1,24 @@
+#root:has(.embed-shell) {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100svh;
+  margin: 0;
+  border-inline: 0;
+  text-align: left;
+}
+
+.embed-shell {
+  min-height: 100svh;
+  box-sizing: border-box;
+  background: var(--bg);
+  color: var(--text);
+  padding: 0;
+}
+
+.embed-invalid {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100svh;
+  padding: 20px;
+  background: var(--bg);
+}

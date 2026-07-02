@@ -4,4 +4,4 @@
 // stylesheet remains exported for explicit CSS loading when preferred:
 //   import '@ragrails/api-playground-react/styles.css'
 
-export * from './features/api-widget';
+export * from './components/widget';

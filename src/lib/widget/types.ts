@@ -5,6 +5,12 @@ export interface WidgetHeader {
   value: string;
 }
 
+export interface ApiPlaygroundResponseExample {
+  status: number;
+  statusText?: string;
+  body: string;
+}
+
 export type WidgetAuth =
   | { type: 'none' }
   | { type: 'bearer'; token: string }
@@ -21,8 +27,10 @@ export interface WidgetRequest {
   auth?: WidgetAuth;
   /** Request body as a string (typically JSON). */
   body?: string;
-  /** Example response body (JSON string) shown under the snippet. */
+  /** @deprecated Use `responseExamples` instead. Kept for backward compatibility. */
   sampleResponse?: string;
+  /** Documented response examples shown under the request snippet. */
+  responseExamples?: ApiPlaygroundResponseExample[];
 }
 
 export interface WidgetResponse {
@@ -37,4 +45,14 @@ export interface WidgetResponse {
 
 export type WidgetSendHandler = (request: WidgetRequest) => Promise<WidgetResponse> | WidgetResponse;
 
-export type SnippetLanguage = 'curl' | 'javascript' | 'python' | 'go';
+export type SnippetLanguage =
+  | 'curl'
+  | 'javascript'
+  | 'python'
+  | 'go'
+  | 'node'
+  | 'cpp'
+  | 'csharp'
+  | 'rust'
+  | 'java'
+  | 'php';

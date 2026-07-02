@@ -16,7 +16,7 @@ export const Card: React.FC<CardProps> = ({ label, flush, className, children })
     {label && <div className="mb-2 text-sm text-muted">{label}</div>}
     <div
       className={cn(
-        'rounded-xl border border-border bg-surface',
+        'w-full rounded-xl border border-border/45 bg-surface',
         !flush && 'p-3',
         className,
       )}

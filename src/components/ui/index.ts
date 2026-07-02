@@ -14,6 +14,8 @@ export type { CheckboxSize } from './Checkbox';
 export { Card } from './Card';
 export { Tabs } from './Tabs';
 export type { TabItem } from './Tabs';
+export { Tooltip } from './Tooltip';
+export type { TooltipSide } from './Tooltip';
 export { TextField } from './TextField';
 export type { TextFieldSize } from './TextField';
 export { Select } from './Select';

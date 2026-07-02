@@ -35,7 +35,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
   return (
     <div
       className={cn(
-        'group relative w-full overflow-hidden rounded-lg border border-border bg-surface-2',
+        'group relative w-full overflow-hidden rounded-lg border border-border/35 bg-surface-2',
         className,
       )}
     >

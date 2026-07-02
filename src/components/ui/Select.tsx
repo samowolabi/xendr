@@ -14,13 +14,16 @@ interface SelectProps<T extends string> {
   onChange: (value: T) => void;
   size?: 'sm' | 'md';
   disabled?: boolean;
+  triggerLabel?: string;
   minWidthClassName?: string;
+  /** Which edge the menu aligns to. Use `'right'` near a container's right edge. */
+  align?: 'left' | 'right';
   className?: string;
 }
 
 const triggerSizes = {
-  sm: 'gap-1.5 px-2.5 py-1.5 text-[12px]',
-  md: 'gap-1 px-2 py-1.5 text-[14px]',
+  sm: 'gap-1.5 px-2.5 py-1 text-[12px]',
+  md: 'gap-1 px-2 py-1 text-[14px]',
 };
 
 const itemSizes = {
@@ -35,7 +38,9 @@ export function Select<T extends string>({
   onChange,
   size = 'md',
   disabled,
+  triggerLabel,
   minWidthClassName = 'min-w-[7rem]',
+  align = 'left',
   className,
 }: SelectProps<T>) {
   const [open, setOpen] = useState(false);
@@ -90,7 +95,7 @@ export function Select<T extends string>({
           selected?.className ?? 'text-content hover:bg-surface-2',
         )}
       >
-        {selected?.label}
+        {triggerLabel ?? selected?.label}
         <Icon
           name="chevron-down"
           className={cn('h-4 w-4 text-muted transition-transform duration-200', open && 'rotate-180')}
@@ -100,14 +105,15 @@ export function Select<T extends string>({
       {render && (
         <div
           className={cn(
-            'absolute left-0 top-full z-20 mt-1 grid overflow-hidden rounded-lg border border-border bg-surface shadow-lg [grid-template-rows:1fr]',
+            'absolute top-full z-20 mt-1 grid overflow-hidden rounded-lg border border-border bg-surface shadow-lg [grid-template-rows:1fr]',
+            align === 'right' ? 'right-0' : 'left-0',
             minWidthClassName,
             open
               ? 'motion-safe:animate-[dropdown-expand_0.2s_ease-out]'
               : 'motion-safe:animate-[dropdown-expand_0.18s_ease-in_reverse_forwards]',
           )}
         >
-          <ul role="listbox" className="min-h-0 overflow-hidden p-1">
+          <ul role="listbox" className="max-h-[248px] min-h-0 overflow-y-auto p-1">
             {items.map((item) => {
               const active = item.id === value;
               return (

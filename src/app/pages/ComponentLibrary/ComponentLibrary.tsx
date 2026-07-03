@@ -369,7 +369,7 @@ export const ComponentLibrary: React.FC<{ section?: ComponentLibrarySection }> =
             </span>
             <div className="leading-tight">
               <div className="text-sm font-semibold text-content">Component Library</div>
-              <div className="text-xs text-muted">API Client design system</div>
+              <div className="text-xs text-muted">Xendr design system</div>
             </div>
           </div>
           <IconButton aria-label="Toggle color mode" variant="surface" onClick={toggleMode}>

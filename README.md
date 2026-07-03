@@ -10,6 +10,14 @@ Give developers a fast way to understand and test your API without leaving your 
 
 Built by [Xendr](https://www.xendr.dev).
 
+## Visual Setup
+
+The fastest way to configure Xendr is with the hosted playground:
+
+**[Set up your API playground at xendr.dev/playground](https://www.xendr.dev/playground)**
+
+Paste a cURL request, customize the widget, preview the result, and copy the React or iframe embed code.
+
 ## Features
 
 - **Embeddable API tester**: add an interactive playground to docs, portals, and internal tools.

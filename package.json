@@ -48,13 +48,14 @@
     "access": "public"
   },
   "scripts": {
-    "dev": "npm run build:lib && vite",
+    "dev": "vite",
     "build": "npm run build:lib",
+    "build:site": "npm run build:app",
     "build:app": "tsc -b && vite build",
     "build:lib": "vite build --config vite.lib.config.ts && npm run build:css && npm run build:inject-css",
     "build:css": "tailwindcss -i ./src/styles/package.css -o ./dist/styles.css --minify",
     "build:inject-css": "node scripts/embed-css.mjs",
-    "check": "npm run lint && npm run build:lib && npm run build:app",
+    "check": "npm run lint && npm run build:lib && npm run build:site",
     "lint": "oxlint",
     "pack:dry": "npm run build:lib && npm pack --dry-run",
     "prepublishOnly": "npm run check",

@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 const root = process.cwd();
 const cssPath = resolve(root, 'dist/styles.css');
 const entryFiles = [resolve(root, 'dist/index.js'), resolve(root, 'dist/index.cjs')];
-const styleId = 'ragrails-api-playground-react-styles';
+const styleId = 'xendr-styles';
 
 const css = await readFile(cssPath, 'utf8');
 const injector = `const __RAGRAILS_API_PLAYGROUND_CSS__=${JSON.stringify(css)};

@@ -21,8 +21,8 @@ import {
   Tooltip,
 } from '@/components/ui';
 import type { IconName } from '@/components/ui';
-import { ApiConsole, ApiPlayground, CodePreviewCard, ImportCard, RequestSnippet } from '@ragrails/api-playground-react';
-import type { WidgetRequest } from '@ragrails/api-playground-react';
+import { ApiConsole, ApiPlayground, CodePreviewCard, ImportCard, RequestSnippet } from '@xendr/react';
+import type { WidgetRequest } from '@xendr/react';
 import { useTheme, DEFAULT_PRIMARY } from '@/theme';
 import { cn } from '@/lib/cn';
 import type { HttpMethod } from '@/types';

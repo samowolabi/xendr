@@ -45,17 +45,25 @@ export function Select<T extends string>({
 }: SelectProps<T>) {
   const [open, setOpen] = useState(false);
   const [render, setRender] = useState(false);
+  const [closing, setClosing] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const selected = items.find((item) => item.id === value) ?? items[0];
 
   useEffect(() => {
     if (open) {
       setRender(true);
+      setClosing(false);
       return;
     }
-    const timeout = window.setTimeout(() => setRender(false), 200);
+
+    if (!render) return;
+    setClosing(true);
+    const timeout = window.setTimeout(() => {
+      setRender(false);
+      setClosing(false);
+    }, 150);
     return () => window.clearTimeout(timeout);
-  }, [open]);
+  }, [open, render]);
 
   useEffect(() => {
     if (!open) return;
@@ -105,13 +113,13 @@ export function Select<T extends string>({
       {render && (
         <div
           className={cn(
-            'absolute top-full z-20 mt-1 grid overflow-hidden rounded-lg border border-border bg-surface shadow-lg [grid-template-rows:1fr]',
+            't-dropdown absolute top-full z-20 mt-1 overflow-hidden rounded-lg border border-border bg-surface shadow-lg',
             align === 'right' ? 'right-0' : 'left-0',
             minWidthClassName,
-            open
-              ? 'motion-safe:animate-[dropdown-expand_0.2s_ease-out]'
-              : 'motion-safe:animate-[dropdown-expand_0.18s_ease-in_reverse_forwards]',
+            open && 'is-open',
+            closing && 'is-closing',
           )}
+          data-origin={align === 'right' ? 'top-right' : 'top-left'}
         >
           <ul role="listbox" className="max-h-[248px] min-h-0 overflow-y-auto p-1">
             {items.map((item) => {

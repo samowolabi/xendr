@@ -13,11 +13,9 @@ export const ResponseLoadingState: React.FC<ResponseLoadingStateProps> = ({
   minHeight = 240,
 }) => (
   <div
-    className={cn('relative w-full overflow-hidden rounded-xl bg-surface-2', className)}
+    className={cn('t-bg-shimmer w-full rounded-xl bg-surface-2 [--bg-shimmer-strength:5%]', className)}
     style={{ minHeight }}
     role="status"
     aria-label="Loading response"
-  >
-    <span className="absolute inset-0 -translate-x-full animate-[shimmer_2s_linear_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-  </div>
+  />
 );

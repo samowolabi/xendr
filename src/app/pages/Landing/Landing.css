@@ -16,82 +16,6 @@
   font-family: var(--sans);
 }
 
-.pg-export-button::before {
-  content: '';
-  position: absolute;
-  inset-block: -45%;
-  left: -65%;
-  width: 42%;
-  transform: skewX(-18deg) translateX(0);
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, var(--primary-contrast) 24%, transparent),
-    color-mix(in srgb, var(--primary-contrast) 46%, transparent),
-    color-mix(in srgb, var(--primary-contrast) 24%, transparent),
-    transparent
-  );
-  opacity: 0;
-  pointer-events: none;
-  animation: pg-export-shimmer-cycle 4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-}
-
-.pg-export-button {
-  animation: pg-export-pulse 4s ease-in-out infinite;
-  transform-origin: center;
-}
-
-.pg-export-button:hover {
-  animation-play-state: paused;
-}
-
-.pg-export-button:hover::before {
-  animation: pg-export-shimmer 2.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@keyframes pg-export-shimmer {
-  0% {
-    opacity: 0;
-    transform: skewX(-18deg) translateX(0);
-  }
-  14% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: skewX(-18deg) translateX(430%);
-  }
-}
-
-@keyframes pg-export-shimmer-cycle {
-  0%,
-  58% {
-    opacity: 0;
-    transform: skewX(-18deg) translateX(0);
-  }
-  66% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: skewX(-18deg) translateX(430%);
-  }
-}
-
-@keyframes pg-export-pulse {
-  0%,
-  72%,
-  100% {
-    transform: scale(1);
-  }
-  80% {
-    transform: scale(1.018);
-  }
-  88% {
-    transform: scale(0.995);
-  }
-}
-
 /* Light theme — exact neutral color system from the reference inspector.
    Scoped to the shell so it overrides the generic light tokens (higher
    specificity than the global [data-theme="light"]) without touching the
@@ -175,18 +99,12 @@
     transform 160ms ease;
 }
 
-.pg-canvas-footer b {
-  color: #f59e0b;
-  font-size: 11px;
-  line-height: 1;
-}
-
 .pg-canvas-footer a:hover {
   color: var(--text);
   transform: translateY(-1px);
 }
 
-.pg-canvas-footer span {
+.pg-canvas-footer [data-separator] {
   width: 3px;
   height: 3px;
   border-radius: 999px;

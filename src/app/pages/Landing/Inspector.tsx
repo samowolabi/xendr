@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { ApiPlaygroundMode, ApiPlaygroundResponseExample } from '@ragrails/api-playground-react'
+import type { ApiPlaygroundMode, ApiPlaygroundResponseExample } from '@xendr/react'
 import { CodeBlock, ColorField, Icon, Select, Switch, Tabs, TextField, Tooltip } from '@/components/ui'
 import type { IconName } from '@/components/ui'
 import { cn } from '@/lib/cn'
@@ -421,7 +421,7 @@ function EmbedPanel({ code, iframeCode, onBack }: { code: string; iframeCode: st
         {target === 'react' ? (
           <>
             <Field label="1 · Install the package">
-              <CodeBlock code="npm i @ragrails/api-playground-react" language="bash" />
+              <CodeBlock code="npm i @xendr/react" language="bash" />
             </Field>
             <Field label="2 · Add the component">
               <CodeBlock code={code} language="javascript" maxHeight="320px" />

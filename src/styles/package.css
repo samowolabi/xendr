@@ -1,7 +1,7 @@
 /*
- * Stylesheet for @ragrails/api-playground-react.
+ * Stylesheet for xendr.
  * This file is embedded into the package entry at build time and also exported
- * as `@ragrails/api-playground-react/styles.css` for explicit CSS loading.
+ * as `@xendr/react/styles.css` for explicit CSS loading.
  *
  * `source(none)` + explicit `@source` limits Tailwind scanning to the widget's
  * own source, so only the utilities it uses are emitted. We intentionally skip

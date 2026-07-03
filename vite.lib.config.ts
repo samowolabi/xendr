@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import dts from 'vite-plugin-dts'
 import { fileURLToPath, URL } from 'node:url'
 
-// Library build for @ragrails/api-playground-react.
+// Library build for xendr.
 // JS + types only — the stylesheet is compiled separately by the Tailwind CLI
 // (see the `build:css` script), so Tailwind is never a runtime dependency.
 export default defineConfig({

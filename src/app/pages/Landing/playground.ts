@@ -3,7 +3,7 @@ import type {
   ApiPlaygroundCustomization,
   ApiPlaygroundMode,
   ApiPlaygroundResponseExample,
-} from '@ragrails/api-playground-react'
+} from '@xendr/react'
 import { embedUrl, type ApiPlaygroundEmbedConfig } from '@/app/embedConfig'
 
 export interface Preset {
@@ -169,7 +169,7 @@ function buildCode(c: CodeInput): string {
   const customization = formatCustomization(c)
   if (customization) props.push(customization)
 
-  return `import { ApiPlayground } from '@ragrails/api-playground-react'\n\n<ApiPlayground\n${props.join('\n')}\n/>`
+  return `import { ApiPlayground } from '@xendr/react'\n\n<ApiPlayground\n${props.join('\n')}\n/>`
 }
 
 function buildEmbedConfig(c: IframeInput): ApiPlaygroundEmbedConfig {

@@ -64,6 +64,16 @@
 [data-theme] {
   --primary-hover: color-mix(in srgb, var(--primary) 86%, #000000);
   --primary-soft: color-mix(in srgb, var(--primary) 16%, transparent);
+
+  --dropdown-open-dur: 250ms;
+  --dropdown-close-dur: 150ms;
+  --dropdown-pre-scale: 0.97;
+  --dropdown-closing-scale: 0.99;
+  --dropdown-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --shimmer-dur: 2000ms;
+  --shimmer-ease: linear;
+  --bg-shimmer-strength: 10%;
 }
 
 /* ── Animations ───────────────────────────────────────────────────────────── */
@@ -80,16 +90,85 @@
     background-position: -200% center;
   }
 }
-@keyframes dropdown-expand {
-  from {
-    grid-template-rows: 0fr;
-    opacity: 0;
-  }
-  to {
-    grid-template-rows: 1fr;
-    opacity: 1;
+
+.t-bg-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.t-bg-shimmer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--primary-contrast) var(--bg-shimmer-strength), transparent),
+    transparent
+  );
+  pointer-events: none;
+  animation: shimmer var(--shimmer-dur) var(--shimmer-ease) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-bg-shimmer::before {
+    animation: none !important;
   }
 }
+
+.t-dropdown {
+  transform-origin: top left;
+  transform: scale(var(--dropdown-pre-scale));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--dropdown-open-dur) var(--dropdown-ease),
+    opacity var(--dropdown-open-dur) var(--dropdown-ease);
+  will-change: transform, opacity;
+}
+
+.t-dropdown[data-origin="top-right"] {
+  transform-origin: top right;
+}
+
+.t-dropdown[data-origin="top-center"] {
+  transform-origin: top center;
+}
+
+.t-dropdown[data-origin="bottom-left"] {
+  transform-origin: bottom left;
+}
+
+.t-dropdown[data-origin="bottom-center"] {
+  transform-origin: bottom center;
+}
+
+.t-dropdown[data-origin="bottom-right"] {
+  transform-origin: bottom right;
+}
+
+.t-dropdown.is-open {
+  transform: scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.t-dropdown.is-closing {
+  transform: scale(var(--dropdown-closing-scale));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--dropdown-close-dur) var(--dropdown-ease),
+    opacity var(--dropdown-close-dur) var(--dropdown-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-dropdown {
+    transition: none !important;
+  }
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -131,11 +210,11 @@
   );
   opacity: 0;
   pointer-events: none;
-  animation: pg-export-shimmer-cycle 4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  animation: pg-export-shimmer-cycle calc(var(--shimmer-dur) * 2) var(--dropdown-ease) infinite;
 }
 
 .pg-export-button {
-  animation: pg-export-pulse 4s ease-in-out infinite;
+  animation: pg-export-pulse calc(var(--shimmer-dur) * 2) ease-in-out infinite;
   transform-origin: center;
 }
 
@@ -144,7 +223,7 @@
 }
 
 .pg-export-button:hover::before {
-  animation: pg-export-shimmer 2.4s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: pg-export-shimmer calc(var(--shimmer-dur) * 1.2) var(--dropdown-ease);
 }
 
 @keyframes pg-export-shimmer {
@@ -254,13 +333,7 @@
   transform: translateY(-1px);
 }
 
-.pg-canvas-footer b {
-  color: #f59e0b;
-  font-size: 11px;
-  line-height: 1;
-}
-
-.pg-canvas-footer span {
+.pg-canvas-footer [data-separator] {
   width: 3px;
   height: 3px;
   border-radius: 999px;

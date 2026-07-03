@@ -21,10 +21,8 @@ const radii: Record<NonNullable<SkeletonProps['rounded']>, string> = {
 /** Placeholder block with a light shimmer sweep, for loading states. */
 export const Skeleton: React.FC<SkeletonProps> = ({ className, width, height, rounded = 'md' }) => (
   <span
-    className={cn('relative block overflow-hidden bg-surface-2', radii[rounded], className)}
+    className={cn('t-bg-shimmer block bg-surface-2', radii[rounded], className)}
     style={{ width, height }}
     aria-hidden="true"
-  >
-    <span className="absolute inset-0 -translate-x-full animate-[shimmer_2s_linear_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-  </span>
+  />
 );

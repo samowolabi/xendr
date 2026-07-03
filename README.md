@@ -1,16 +1,14 @@
-# @ragrails/api-playground-react
+# Xendr React API Playground
 
-[![npm version](https://img.shields.io/npm/v/@ragrails/api-playground-react.svg)](https://www.npmjs.com/package/@ragrails/api-playground-react)
-[![types](https://img.shields.io/npm/types/@ragrails/api-playground-react.svg)](https://www.npmjs.com/package/@ragrails/api-playground-react)
-[![license](https://img.shields.io/npm/l/@ragrails/api-playground-react.svg)](./LICENSE)
+[![npm version](https://img.shields.io/npm/v/@xendr/react.svg)](https://www.npmjs.com/package/@xendr/react)
+[![types](https://img.shields.io/npm/types/@xendr/react.svg)](https://www.npmjs.com/package/@xendr/react)
+[![license](https://img.shields.io/npm/l/@xendr/react.svg)](./LICENSE)
 
 A lightweight, embeddable React API playground for interactive API docs, developer portals, SDK docs, and internal tools.
 
 Give developers a fast way to understand and test your API without leaving your docs. Add one component and get cURL-powered code snippets, a **Try it out** console, request editing, auth, cURL import, live API responses, and history.
 
-Built by [RagRails](https://docs.ragrails.com).
-
-If you find this useful, please [star the repo](https://github.com/ragrails/api-playground).
+Built by [Xendr](https://xendr.dev).
 
 ## Features
 
@@ -46,7 +44,7 @@ If you find this useful, please [star the repo](https://github.com/ragrails/api-
 ## Install
 
 ```bash
-npm i @ragrails/api-playground-react
+npm i @xendr/react
 ```
 
 `react` and `react-dom` are peer dependencies. React 18 and 19 are supported.
@@ -54,7 +52,7 @@ npm i @ragrails/api-playground-react
 ## Quick Start
 
 ```tsx
-import { ApiPlayground } from '@ragrails/api-playground-react'
+import { ApiPlayground } from '@xendr/react'
 
 export function ApiDocs() {
   return (
@@ -70,13 +68,13 @@ That is enough to render a snippet card with a **Try it out** console.
 Styles are included automatically. An optional CSS export is available if your app prefers explicit stylesheet loading:
 
 ```tsx
-import '@ragrails/api-playground-react/styles.css'
+import '@xendr/react/styles.css'
 ```
 
 ## A Complete Example
 
 ```tsx
-import { ApiPlayground } from '@ragrails/api-playground-react'
+import { ApiPlayground } from '@xendr/react'
 
 const initialRequest = `curl -X POST 'https://jsonplaceholder.typicode.com/posts' \\
   -H 'Content-Type: application/json' \\
@@ -128,7 +126,7 @@ export function CreatePostDocs() {
 | `request` | `string` | Required | The cURL request shown and tested by the widget. |
 | `onUpdateRequest` | `(request: string) => void` | `undefined` | Receives the latest cURL request after edits or imports. |
 | `title` | `string` | `undefined` | Optional console heading. Replaces “Try it Out” when set. |
-| `responseExamples` | `{ status: number; statusText?: string; body: string }[]` | `undefined` | Documented response examples shown as selectable status-code pills below the request snippet. |
+| `responseExamples` | `{ status: number; statusText?: string; body: string }[]` | `undefined` | Documented response examples shown as selectable status-code options below the request snippet. |
 | `editable` | `boolean` | `true` | Enables or disables editing in the console. |
 | `allowImport` | `boolean` | `true` | Shows or hides the cURL import action. |
 | `mode` | `'dark' \| 'light' \| 'system'` | `'dark'` | Controls the widget theme. `system` follows the user's OS preference. |
@@ -265,7 +263,7 @@ The widget includes its styles automatically. Consumers do not need Tailwind, a 
 The optional stylesheet export remains available:
 
 ```tsx
-import '@ragrails/api-playground-react/styles.css'
+import '@xendr/react/styles.css'
 ```
 
 Use that path if your app prefers explicit CSS loading.
@@ -277,7 +275,7 @@ The widget is themeable with `mode`, shared customization, and mode-aware `custo
 Types are included. No separate `@types` package is required.
 
 ```ts
-import type { ApiPlaygroundProps } from '@ragrails/api-playground-react'
+import type { ApiPlaygroundProps } from '@xendr/react'
 ```
 
 ## Notes

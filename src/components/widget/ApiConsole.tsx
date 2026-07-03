@@ -510,7 +510,7 @@ const ResponseContent: React.FC<ResponseContentProps> = ({ responsePanel, respon
         copyable={false}
         reveal
         revealStagger={28}
-        maxHeight="300px"
+        maxHeight="200px"
         className="pr-4 [&_*]:text-[13px]"
       />
     </div>

@@ -1,6 +1,7 @@
 import { ApiPlayground } from './ApiPlayground'
 import { Inspector } from '@/app/pages/Landing/Inspector'
 import { usePlaygroundConfig } from '@/app/pages/Landing/playground'
+import { XendrLogo } from './XendrLogo'
 
 /**
  * Full playground shell: live widget on the left, control inspector on the
@@ -29,16 +30,12 @@ export function ApiPlaygroundShowcase() {
             />
           </div>
           <div className="pg-canvas-footer">
-            <a href="https://docs.ragrails.com" target="_blank" rel="noreferrer">
-              Powered by RagRails
+            <a href="https://xendr.dev" target="_blank" rel="noreferrer">
+              <span>Powered by</span>
+              <XendrLogo className="h-3 w-auto text-content" />
             </a>
-            <span aria-hidden="true" />
-            <a href="https://github.com/ragrails/api-playground" target="_blank" rel="noreferrer">
-              <b aria-hidden="true">★</b>
-              Star on Github
-            </a>
-            <span aria-hidden="true" />
-            <a href="https://docs.ragrails.com" target="_blank" rel="noreferrer">
+            <span data-separator aria-hidden="true" />
+            <a href="https://xendr.dev" target="_blank" rel="noreferrer">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="14"

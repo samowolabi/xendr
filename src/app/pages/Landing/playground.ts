@@ -3,7 +3,7 @@ import type {
   ApiPlaygroundCustomization,
   ApiPlaygroundMode,
   ApiPlaygroundResponseExample,
-} from '@xendr/react'
+} from '@/components/widget'
 import { embedUrl, type ApiPlaygroundEmbedConfig } from '@/app/embedConfig'
 
 export interface Preset {
@@ -81,7 +81,10 @@ export const PRESETS: Preset[] = [
 ]
 
 export const DEFAULT_PRIMARY = '#7855FF'
-const MODE_BG = { dark: '#16171d', light: '#f7f7f9' } as const
+const MODE_BG: Record<Exclude<ApiPlaygroundMode, 'system'>, string> = {
+  dark: '#16171d',
+  light: '#f7f7f9',
+}
 
 interface CodeInput {
   request: string

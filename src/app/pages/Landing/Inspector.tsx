@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { ApiPlaygroundMode, ApiPlaygroundResponseExample } from '@xendr/react'
+import type { ApiPlaygroundMode, ApiPlaygroundResponseExample } from '@/components/widget'
 import { CodeBlock, ColorField, Icon, Select, Switch, Tabs, TextField, Tooltip } from '@/components/ui'
 import type { IconName } from '@/components/ui'
 import { cn } from '@/lib/cn'

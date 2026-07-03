@@ -21,8 +21,8 @@ import {
   Tooltip,
 } from '@/components/ui';
 import type { IconName } from '@/components/ui';
-import { ApiConsole, ApiPlayground, CodePreviewCard, ImportCard, RequestSnippet } from '@xendr/react';
-import type { WidgetRequest } from '@xendr/react';
+import { ApiConsole, ApiPlayground, CodePreviewCard, ImportCard, RequestSnippet } from '@/components/widget';
+import type { WidgetRequest } from '@/components/widget';
 import { useTheme, DEFAULT_PRIMARY } from '@/theme';
 import { cn } from '@/lib/cn';
 import type { HttpMethod } from '@/types';

@@ -37,8 +37,8 @@ type EmbedTarget = (typeof EMBED_TARGETS)[number]['id']
 
 // One-line "which should I pick" guidance shown under the target tabs.
 const TARGET_INFO: Record<EmbedTarget, string> = {
-  react: 'Best for React apps: install the package and render the component.',
-  iframe: 'Works on any site: paste the snippet, no install or build step.',
+  react: 'Best for React apps. Install the package and render the component.',
+  iframe: 'Works on any site. Paste the snippet, no install or build step.',
 }
 
 // Common HTTP status codes with their standard reason phrases.

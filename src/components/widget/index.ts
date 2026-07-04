@@ -1,5 +1,4 @@
 export { ApiPlayground } from './ApiPlayground';
-export { ApiPlaygroundShowcase } from './ApiPlaygroundShowcase';
 export type {
   ApiPlaygroundCustomization,
   ApiPlaygroundDefaultView,

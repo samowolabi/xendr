@@ -21,13 +21,11 @@ export default defineConfig({
       entryRoot: fileURLToPath(new URL('./src', import.meta.url)),
       include: [
         'src/index.ts',
-        'src/components/widget/**',
         'src/components/**',
         'src/lib/**',
         'src/types/**',
-        'src/app/pages/Landing/**',
-        'src/app/embedConfig.ts',
       ],
+      exclude: ['src/components/widget/ApiPlaygroundShowcase.tsx'],
     }),
   ],
   build: {

@@ -7,7 +7,7 @@ export type IconButtonSize = 'sm' | 'md';
 interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: IconButtonVariant;
   size?: IconButtonSize;
-  /** Accessible label — required since the button has no text. */
+  /** Accessible label, required since the button has no text. */
   'aria-label': string;
 }
 

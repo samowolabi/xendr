@@ -1,4 +1,4 @@
-# AI Design Skill Brief — Design Brief
+# AI Design Skill Brief: Design Brief
 
 > Build-ready design skill brief for Claude Code
 > Tool: **Claude Code**

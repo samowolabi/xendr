@@ -4,7 +4,7 @@ import { cn } from '@/lib/cn';
 interface CardProps {
   /** Muted label rendered above the card (e.g. "Get Users", "Sample Response"). */
   label?: string;
-  /** Remove inner padding — useful when the card hosts its own toolbar/body. */
+  /** Remove inner padding, useful when the card hosts its own toolbar/body. */
   flush?: boolean;
   className?: string;
   children: React.ReactNode;

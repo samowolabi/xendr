@@ -1,4 +1,4 @@
-/* Playground shell — a design-tool style workspace: dot-grid canvas + inspector. */
+/* Playground shell: a design-tool style workspace with dot-grid canvas + inspector. */
 
 /* The package demo is a full-bleed app, so reset host root constraints while
    this screen is active. */
@@ -16,7 +16,7 @@
   font-family: var(--sans);
 }
 
-/* Light theme — exact neutral color system from the reference inspector.
+/* Light theme: exact neutral color system from the reference inspector.
    Scoped to the shell so it overrides the generic light tokens (higher
    specificity than the global [data-theme="light"]) without touching the
    widget, which re-declares its own tokens in its subtree. */

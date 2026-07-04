@@ -397,7 +397,7 @@ export const ComponentLibrary: React.FC<{ section?: ComponentLibrarySection }> =
             <p className="mt-1.5 max-w-2xl text-sm leading-6 text-muted">
               A themeable set of React + Tailwind components for the API client. Every color flows
               through CSS variables, so primary color, background, and dark/light mode can be changed
-              at runtime — try the controls in the sidebar.
+              at runtime. Try the controls in the sidebar.
             </p>
           </div>
 
@@ -763,7 +763,7 @@ export const ComponentLibrary: React.FC<{ section?: ComponentLibrarySection }> =
                 <Section
                   id="widget-import"
                   title="Import"
-                  description="Paste a cURL command to populate a request. Standalone for now — not yet wired into the console."
+                  description="Paste a cURL command to populate a request. Standalone for now, not yet wired into the console."
                 >
                   <ImportCard onImport={() => {}} />
                 </Section>

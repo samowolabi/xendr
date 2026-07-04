@@ -4,7 +4,7 @@ import dts from 'vite-plugin-dts'
 import { fileURLToPath, URL } from 'node:url'
 
 // Library build for xendr.
-// JS + types only — the stylesheet is compiled separately by the Tailwind CLI
+// JS + types only. The stylesheet is compiled separately by the Tailwind CLI
 // (see the `build:css` script), so Tailwind is never a runtime dependency.
 export default defineConfig({
   resolve: {
@@ -14,7 +14,7 @@ export default defineConfig({
   publicDir: false,
   plugins: [
     react(),
-    // Per-file declarations (no API Extractor — it doesn't support TS 6 yet).
+    // Per-file declarations (no API Extractor, it doesn't support TS 6 yet).
     // Aliases are rewritten to relative paths in the emitted .d.ts.
     dts({
       tsconfigPath: './tsconfig.app.json',

@@ -1,5 +1,5 @@
 /*
- * Shared theming layer — single source of truth for the dev app (global.css)
+ * Shared theming layer, single source of truth for the dev app (global.css)
  * and the shipped package (package.css). Both @import this file so their tokens,
  * syntax-highlight colors, keyframes, and the button-cursor reset can never
  * drift apart. Only fonts and app/landing-specific styles live in the hosts.
@@ -358,7 +358,7 @@
   }
 }
 
-/* ── Syntax tokens — colors resolve from the nearest [data-theme] via vars. ── */
+/* Syntax tokens: colors resolve from the nearest [data-theme] via vars. */
 .token.comment,
 .token.prolog,
 .token.doctype,

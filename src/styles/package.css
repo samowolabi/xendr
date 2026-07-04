@@ -6,7 +6,7 @@
  * `source(none)` + explicit `@source` limits Tailwind scanning to the widget's
  * own source, so only the utilities it uses are emitted. We intentionally skip
  * Tailwind preflight/base so importing this file does not reset host app styles.
- * Fonts fall back to the system stack — override `--font-heading` / `--font-sans`
+ * Fonts fall back to the system stack. Override `--font-heading` / `--font-sans`
  * for a custom face. All tokens/keyframes/syntax colors come from theme.css, the
  * shared source of truth (see src/styles/theme.css).
  */

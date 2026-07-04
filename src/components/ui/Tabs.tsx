@@ -57,7 +57,7 @@ export const Tabs: React.FC<TabsProps> = ({
   if (variant === 'segmented') {
     return (
       <div className={cn('relative inline-flex gap-0.5 rounded-lg bg-surface-2/70 p-0.5 ring-1 ring-border/70', className)}>
-        {/* Sliding pill — white "liquid glass" surface (matches the Switch thumb) */}
+        {/* Sliding pill with white "liquid glass" surface (matches the Switch thumb) */}
         <span
           className="pointer-events-none absolute z-0 rounded-lg bg-white/95 shadow-sm ring-1 ring-black/[0.06] backdrop-blur-sm transition-all duration-300 ease-out"
           style={{ left: rect.left, top: rect.top, width: rect.width, height: rect.height }}
@@ -78,7 +78,7 @@ export const Tabs: React.FC<TabsProps> = ({
               )}
             >
               {/* Inactive text labels shimmer (gradient clipped to the text) on hover.
-                  Only applies to plain-string labels — the clip-text trick blanks out
+                  Only applies to plain-string labels. The clip-text trick blanks out
                   non-text labels (e.g. icons), so those just get a color change. */}
               <span
                 className={cn(

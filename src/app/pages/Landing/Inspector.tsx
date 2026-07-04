@@ -37,8 +37,8 @@ type EmbedTarget = (typeof EMBED_TARGETS)[number]['id']
 
 // One-line "which should I pick" guidance shown under the target tabs.
 const TARGET_INFO: Record<EmbedTarget, string> = {
-  react: 'Best for React apps — install the package and render the component.',
-  iframe: 'Works on any site — paste the snippet, no install or build step.',
+  react: 'Best for React apps: install the package and render the component.',
+  iframe: 'Works on any site: paste the snippet, no install or build step.',
 }
 
 // Common HTTP status codes with their standard reason phrases.
@@ -99,7 +99,7 @@ function hintContent({ text, configKey }: Hint) {
   )
 }
 
-// Wraps a label in its hint tooltip (hover/focus the label itself — no icon).
+// Wraps a label in its hint tooltip (hover/focus the label itself, no icon).
 function WithHint({ hint, children }: { hint?: Hint; children: React.ReactElement }) {
   if (!hint) return children
   return (
@@ -109,7 +109,7 @@ function WithHint({ hint, children }: { hint?: Hint; children: React.ReactElemen
   )
 }
 
-// Sections read as blocks via a bold heading + generous top padding — no
+// Sections read as blocks via a bold heading + generous top padding, no
 // dividers or bordered containers (per the design brief's spacing rhythm).
 function Section({ title, hint, children }: { title: string; hint?: Hint; children: React.ReactNode }) {
   return (
@@ -401,6 +401,22 @@ function Controls({ cfg, onEmbed }: { cfg: PlaygroundConfig; onEmbed: () => void
         <ResponsesEditor cfg={cfg} />
       </Section>
 
+      <Section title="Languages">
+        <Row
+          icon="code"
+          label="Snippets"
+          align="start"
+          hint={{
+            text: 'Controls which programming language snippets appear, preserving this order.',
+            configKey: 'snippetLanguages',
+          }}
+        >
+          <div className="w-full max-w-[210px]">
+            <SnippetLanguagePicker cfg={cfg} />
+          </div>
+        </Row>
+      </Section>
+
       <Section title="Appearance">
         <Row
           icon={cfg.widgetMode === 'light' ? 'sun' : 'moon'}
@@ -430,22 +446,6 @@ function Controls({ cfg, onEmbed }: { cfg: PlaygroundConfig; onEmbed: () => void
           hint={{ text: 'Widget background colour for the active mode.', configKey: 'customization.{mode}.background' }}
         >
           <ColorField value={cfg.background} onChange={cfg.changeBackground} className="max-w-[160px]" />
-        </Row>
-      </Section>
-
-      <Section title="Languages">
-        <Row
-          icon="code"
-          label="Snippets"
-          align="start"
-          hint={{
-            text: 'Controls which programming language snippets appear, preserving this order.',
-            configKey: 'snippetLanguages',
-          }}
-        >
-          <div className="w-full max-w-[210px]">
-            <SnippetLanguagePicker cfg={cfg} />
-          </div>
         </Row>
       </Section>
 
@@ -548,7 +548,7 @@ function EmbedPanel({ code, iframeCode, onBack }: { code: string; iframeCode: st
               <CodeBlock code={iframeCode} language="plain" maxHeight="320px" />
             </Field>
             <p className="text-[12px] leading-relaxed text-muted">
-              All your settings travel inside the URL (base64-encoded) — no backend or build step needed.
+              All your settings travel inside the URL (base64-encoded), no backend or build step needed.
             </p>
             <button type="button" onClick={copy} className={cn(accentButton, 'justify-center gap-2 text-[14px] font-semibold')}>
               <Icon name={copied ? 'check' : 'copy'} className="h-4 w-4" />

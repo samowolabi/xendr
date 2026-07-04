@@ -2,7 +2,7 @@ import React, { createContext, useContext, useMemo, useState } from 'react';
 
 export type ThemeMode = 'dark' | 'light';
 
-/** Default brand color — overridable per host. */
+/** Default brand color, overridable per host. */
 export const DEFAULT_PRIMARY = '#7855FF';
 
 interface ThemeContextValue {

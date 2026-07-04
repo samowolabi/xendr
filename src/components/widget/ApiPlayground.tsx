@@ -64,7 +64,7 @@ export interface ApiPlaygroundProps {
   mode?: ApiPlaygroundMode;
   /**
    * When true, the start snippet tracks live edits made in the console.
-   * Default false — the snippet stays pinned to the documented `request`.
+   * Default false: the snippet stays pinned to the documented `request`.
    */
   syncSnippet?: boolean;
   /** Initial widget view. Use `'console'` to open directly in Try it Out. */
@@ -297,8 +297,8 @@ export const ApiPlayground: React.FC<ApiPlaygroundProps> = ({
   }, [defaultView]);
 
   // Two separate entities:
-  //  • `request` (prop) — the documented request, drives the preview snippet.
-  //  • `liveCurl` (internal) — the console's working copy.
+  //  • `request` (prop): the documented request, drives the preview snippet.
+  //  • `liveCurl` (internal): the console's working copy.
   // They start equal; the console only edits `liveCurl`. Reset when the
   // documented request changes.
   const [liveCurl, setLiveCurl] = useState(request);
@@ -306,7 +306,7 @@ export const ApiPlayground: React.FC<ApiPlaygroundProps> = ({
     setLiveCurl(request);
   }, [request]);
 
-  // Console entity — always the live cURL.
+  // Console entity: always the live cURL.
   const parsedRequest = useMemo(() => {
     const parsed = parseCurl(liveCurl);
     return parsed ? hydrateRequest(parsed, title, sampleResponse, responseExamples) : null;
@@ -315,7 +315,7 @@ export const ApiPlayground: React.FC<ApiPlaygroundProps> = ({
   if (parsedRequest) lastConsoleRequestRef.current = parsedRequest;
   const consoleRequest = parsedRequest ?? lastConsoleRequestRef.current;
 
-  // Preview entity — the documented `request`, unless `syncSnippet` mirrors live edits.
+  // Preview entity: the documented `request`, unless `syncSnippet` mirrors live edits.
   const snippetCurl = syncSnippet ? liveCurl : request;
   const snippetRequest = useMemo(() => {
     const parsed = parseCurl(snippetCurl);

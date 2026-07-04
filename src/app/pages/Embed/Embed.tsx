@@ -36,7 +36,6 @@ export default function Embed() {
         allowImport={config.allowImport ?? true}
         syncSnippet={config.syncSnippet ?? false}
         defaultView={config.defaultView ?? 'snippet'}
-        emptyResponseUntilSend={config.emptyResponseUntilSend ?? false}
         snippetLanguages={config.snippetLanguages}
         customization={config.customization}
       />

@@ -61,7 +61,7 @@ export const ImportCard: React.FC<ImportCardProps> = ({ onImport, onCancel, clas
           aria-label="cURL command"
           className={cn(
             'w-full resize-none rounded-lg border border-border/35 bg-surface-2 p-3 font-mono text-[13px] leading-relaxed text-content outline-none',
-            'placeholder:text-muted/50 focus:ring-2 focus:ring-primary/20',
+            'placeholder:text-muted/50',
             error && 'border-red-500/60',
           )}
         />

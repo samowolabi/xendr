@@ -97,7 +97,7 @@ export function Select<T extends string>({
         onClick={() => setOpen((current) => !current)}
         className={cn(
           'inline-flex cursor-pointer items-center rounded-md font-heading transition-colors duration-150',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60',
+          'focus:outline-none',
           'disabled:cursor-not-allowed disabled:opacity-60',
           triggerSizes[size],
           selected?.className ?? 'text-content hover:bg-surface-2',

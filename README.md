@@ -142,7 +142,6 @@ export function CreatePostDocs() {
 | `snippetLanguages` | `SnippetLanguage[]` | All supported languages | Controls which snippet languages appear. The widget preserves the array order. |
 | `syncSnippet` | `boolean` | `false` | When `true`, the snippet follows console edits. |
 | `defaultView` | `'snippet' \| 'console'` | `'snippet'` | Controls the initial view. Use `'console'` to open directly in Try it Out. |
-| `emptyResponseUntilSend` | `boolean` | `false` | When `true`, the console response area stays empty until the first request is sent. |
 
 ## Common Patterns
 

@@ -17,7 +17,6 @@ export interface ApiPlaygroundEmbedConfig {
   allowImport?: boolean;
   syncSnippet?: boolean;
   defaultView?: ApiPlaygroundDefaultView;
-  emptyResponseUntilSend?: boolean;
   snippetLanguages?: SnippetLanguage[];
   customization?: ApiPlaygroundCustomization;
 }
@@ -30,7 +29,6 @@ export const DEFAULT_EMBED_CONFIG: ApiPlaygroundEmbedConfig = {
   allowImport: true,
   syncSnippet: false,
   defaultView: 'console',
-  emptyResponseUntilSend: true,
 };
 
 function bytesToBase64(bytes: Uint8Array): string {
@@ -112,7 +110,6 @@ export function decodeEmbedConfig(value: string | null): ApiPlaygroundEmbedConfi
       ...(isBoolean(parsed.allowImport) ? { allowImport: parsed.allowImport } : {}),
       ...(isBoolean(parsed.syncSnippet) ? { syncSnippet: parsed.syncSnippet } : {}),
       ...(isDefaultView(parsed.defaultView) ? { defaultView: parsed.defaultView } : {}),
-      ...(isBoolean(parsed.emptyResponseUntilSend) ? { emptyResponseUntilSend: parsed.emptyResponseUntilSend } : {}),
       ...(Array.isArray(parsed.snippetLanguages) ? { snippetLanguages: parsed.snippetLanguages as SnippetLanguage[] } : {}),
       ...(isRecord(parsed.customization) ? { customization: parsed.customization as ApiPlaygroundCustomization } : {}),
     };

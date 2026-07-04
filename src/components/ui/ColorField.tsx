@@ -19,7 +19,7 @@ export const ColorField: React.FC<ColorFieldProps> = ({ label, value, onChange, 
           {label}
         </label>
       )}
-      <div className="flex items-center gap-1.5 rounded-md border border-border bg-surface-2 p-1 focus-within:border-primary">
+      <div className="flex items-center gap-1.5 rounded-md border border-border bg-surface-2 p-1">
         <label
           className="relative h-5 w-5 shrink-0 overflow-hidden rounded border border-border"
           style={{ backgroundColor: value }}

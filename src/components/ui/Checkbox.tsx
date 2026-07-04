@@ -49,7 +49,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
       onClick={() => onChange(!checked)}
       className={cn(
         'inline-flex shrink-0 items-center justify-center border transition-colors duration-150',
-        'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60',
+        'focus:outline-none',
         'disabled:cursor-not-allowed disabled:opacity-50',
         boxSizes[size],
         checked

@@ -9,7 +9,6 @@ import {
   IconButton,
   MethodBadge,
   MethodSelect,
-  ResponseEmptyState,
   Select,
   StatusBadge,
   Tabs,
@@ -18,7 +17,7 @@ import {
 } from '@/components/ui';
 import type { HttpMethod } from '@/types';
 import { cn } from '@/lib/cn';
-import { executeWidgetRequest, mockWidgetResponse, widgetErrorResponse } from '@/lib/widget/executor';
+import { executeWidgetRequest, widgetErrorResponse } from '@/lib/widget/executor';
 import {
   authFromHeader,
   initialAuth,
@@ -47,12 +46,15 @@ export interface ApiConsoleProps {
   request: WidgetRequest;
   onRequestChange?: (request: WidgetRequest) => void;
   onSend?: WidgetSendHandler;
+  history?: ApiConsoleHistoryEntry[];
+  onHistoryChange?: React.Dispatch<React.SetStateAction<ApiConsoleHistoryEntry[]>>;
+  selectedResponse?: WidgetResponse | null;
+  onSelectedResponseChange?: React.Dispatch<React.SetStateAction<WidgetResponse | null>>;
   title?: string;
   editable?: boolean;
   onBack?: () => void;
   onImport?: () => void;
   onCodePreview?: () => void;
-  emptyResponseUntilSend?: boolean;
   className?: string;
 }
 
@@ -109,7 +111,6 @@ const FieldShell: React.FC<{ children: React.ReactNode; className?: string }> = 
   <div
     className={cn(
       'flex min-h-10 items-center rounded-md border border-border/35 bg-surface-2 px-3 text-sm text-content',
-      'focus-within:ring-2 focus-within:ring-primary/20',
       className,
     )}
   >
@@ -266,7 +267,6 @@ const BodyEditor: React.FC<BodyEditorProps> = ({
         className={cn(
           'max-h-[300px] w-full resize-none overflow-auto rounded-lg border border-border/35 bg-surface-2 p-3 pr-11 [field-sizing:content]',
           'font-mono text-[13px] leading-relaxed text-content outline-none placeholder:text-muted read-only:cursor-default',
-          'focus:ring-2 focus:ring-primary/15',
         )}
       />
       <div className="group absolute right-2 top-2">
@@ -517,7 +517,7 @@ const ResponseContent: React.FC<ResponseContentProps> = ({ responsePanel, respon
   );
 };
 
-interface HistoryEntry {
+export interface ApiConsoleHistoryEntry {
   request: WidgetRequest;
   response: WidgetResponse;
   at: number;
@@ -533,8 +533,8 @@ function relativeTime(at: number): string {
 }
 
 interface HistoryListProps {
-  entries: HistoryEntry[];
-  onSelect: (entry: HistoryEntry) => void;
+  entries: ApiConsoleHistoryEntry[];
+  onSelect: (entry: ApiConsoleHistoryEntry) => void;
   onClear: () => void;
 }
 
@@ -612,12 +612,15 @@ export const ApiConsole: React.FC<ApiConsoleProps> = ({
   request,
   onRequestChange,
   onSend,
+  history: controlledHistory,
+  onHistoryChange,
+  selectedResponse: controlledSelectedResponse,
+  onSelectedResponseChange,
   title,
   editable = true,
   onBack,
   onImport,
   onCodePreview,
-  emptyResponseUntilSend = false,
   className,
 }) => {
   const auth = useMemo(() => initialAuth(request), [request]);
@@ -635,13 +638,17 @@ export const ApiConsole: React.FC<ApiConsoleProps> = ({
   const [responseTab, setResponseTab] = useState<ResponseTab>('response');
   const [responsePanel, setResponsePanel] = useState<ResponsePanel>('body');
   const [isSending, setIsSending] = useState(false);
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [internalHistory, setInternalHistory] = useState<ApiConsoleHistoryEntry[]>([]);
+  const [internalSelectedResponse, setInternalSelectedResponse] = useState<WidgetResponse | null>(null);
   const [bodyError, setBodyError] = useState<string | null>(null);
-  const [selectedResponse, setSelectedResponse] = useState<WidgetResponse | null>(null);
   const [draftMethod, setDraftMethod] = useState(request.method);
   const [draftUrl, setDraftUrl] = useState(request.url);
   const responseCardRef = useRef<HTMLDivElement>(null);
-  const fallbackResponse = useMemo(() => mockWidgetResponse(request), [request]);
+  const history = controlledHistory ?? internalHistory;
+  const setHistory = onHistoryChange ?? setInternalHistory;
+  const selectedResponse =
+    controlledSelectedResponse !== undefined ? controlledSelectedResponse : internalSelectedResponse;
+  const setSelectedResponse = onSelectedResponseChange ?? setInternalSelectedResponse;
 
   useEffect(() => {
     setDraftMethod(request.method);
@@ -654,9 +661,8 @@ export const ApiConsole: React.FC<ApiConsoleProps> = ({
     setDraftHeaders(createDraftHeaders(initialHeaderRows));
   }, [initialHeaderRows]);
 
-  // Keep the last real response visible; only fall back before anything is sent.
-  const displayedResponse = selectedResponse ?? fallbackResponse;
-  const showEmptyResponse = emptyResponseUntilSend && !selectedResponse;
+  const displayedResponse = selectedResponse;
+  const showResponseCard = Boolean(selectedResponse);
   const headers = draftHeaders;
   const enabledHeaderCount = headers.filter((header) => header.enabled).length;
   const requestTabs = REQUEST_TABS.map((tab) =>
@@ -767,14 +773,14 @@ export const ApiConsole: React.FC<ApiConsoleProps> = ({
       });
     });
     setHistory((previous) => {
-      const entry: HistoryEntry = { request: sentRequest, response, at: Date.now() };
+      const entry: ApiConsoleHistoryEntry = { request: sentRequest, response, at: Date.now() };
       // De-duplicate: an identical request moves to the top instead of stacking.
       const withoutDuplicate = previous.filter((item) => requestKey(item.request) !== sentRequestKey);
       return [entry, ...withoutDuplicate].slice(0, 25);
     });
   };
 
-  const selectHistory = (entry: HistoryEntry) => {
+  const selectHistory = (entry: ApiConsoleHistoryEntry) => {
     onRequestChange?.(entry.request);
     setSelectedResponse(entry.response);
     setResponseTab('response');
@@ -874,46 +880,44 @@ export const ApiConsole: React.FC<ApiConsoleProps> = ({
         </div>
       </Card>
 
-      <div ref={responseCardRef} className="w-full">
-        <Card flush>
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-3 pt-1">
-            <Tabs
-              items={RESPONSE_TABS}
-              activeId={responseTab}
-              onChange={(id) => setResponseTab(id as ResponseTab)}
-              className="border-b-0"
-            />
-            <div className="flex items-center gap-3">
-              {responseTab === 'response' && (
-                <ResponsePanelSwitch value={responsePanel} onChange={setResponsePanel} />
-              )}
-            </div>
-          </div>
-
-          {responseTab === 'response' ? (
-            showEmptyResponse ? (
-              <ResponseEmptyState />
-            ) : (
-              <>
-                <div className="flex flex-wrap items-center gap-5 border-b border-border px-3 py-2.5 text-xs text-muted">
-                  <StatusBadge status={displayedResponse.status} statusText={displayedResponse.statusText} />
-                  <span>{displayedResponse.timeMs}ms</span>
-                  <span>{displayedResponse.size}</span>
-                </div>
-                <ResponseContent responsePanel={responsePanel} response={displayedResponse} />
-              </>
-            )
-          ) : (
-            <div className="p-3">
-              <HistoryList
-                entries={history}
-                onSelect={selectHistory}
-                onClear={() => setHistory([])}
+      {showResponseCard && (
+        <div ref={responseCardRef} className="w-full">
+          <Card flush>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-3 pt-1">
+              <Tabs
+                items={RESPONSE_TABS}
+                activeId={responseTab}
+                onChange={(id) => setResponseTab(id as ResponseTab)}
+                className="border-b-0"
               />
+              <div className="flex items-center gap-3">
+                {responseTab === 'response' && (
+                  <ResponsePanelSwitch value={responsePanel} onChange={setResponsePanel} />
+                )}
+              </div>
             </div>
-          )}
-        </Card>
-      </div>
+
+            {responseTab === 'response' && displayedResponse ? (
+                <>
+                  <div className="flex flex-wrap items-center gap-5 border-b border-border px-3 py-2.5 text-xs text-muted">
+                    <StatusBadge status={displayedResponse.status} statusText={displayedResponse.statusText} />
+                    <span>{displayedResponse.timeMs}ms</span>
+                    <span>{displayedResponse.size}</span>
+                  </div>
+                  <ResponseContent responsePanel={responsePanel} response={displayedResponse} />
+                </>
+            ) : (
+              <div className="p-3">
+                <HistoryList
+                  entries={history}
+                  onSelect={selectHistory}
+                  onClear={() => setHistory([])}
+                />
+              </div>
+            )}
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

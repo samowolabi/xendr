@@ -3,8 +3,10 @@ import type {
   ApiPlaygroundCustomization,
   ApiPlaygroundMode,
   ApiPlaygroundResponseExample,
+  SnippetLanguage,
 } from '@/components/widget'
 import { embedUrl, type ApiPlaygroundEmbedConfig } from '@/app/embedConfig'
+import { DEFAULT_SNIPPET_LANGUAGES } from '@/lib/widget/snippets'
 
 export interface Preset {
   id: string
@@ -95,6 +97,7 @@ interface CodeInput {
   allowImport: boolean
   syncSnippet: boolean
   defaultView: 'snippet' | 'console'
+  snippetLanguages: SnippetLanguage[]
   primary: string
   background: string
   bgTouched: boolean
@@ -109,6 +112,7 @@ interface IframeInput {
   allowImport: boolean
   syncSnippet: boolean
   defaultView: 'snippet' | 'console'
+  snippetLanguages: SnippetLanguage[]
   customization: ApiPlaygroundCustomization
 }
 
@@ -139,6 +143,11 @@ function formatResponseExamples(examples: ApiPlaygroundResponseExample[]): strin
   return lines.join('\n')
 }
 
+function isDefaultSnippetLanguages(languages: SnippetLanguage[]): boolean {
+  if (languages.length !== DEFAULT_SNIPPET_LANGUAGES.length) return false
+  return languages.every((language, index) => language === DEFAULT_SNIPPET_LANGUAGES[index])
+}
+
 function formatCustomization(c: Pick<CodeInput, 'primary' | 'background' | 'bgTouched' | 'widgetMode'>): string | null {
   const custom: string[] = []
   const hasCustomPrimary = c.primary.toLowerCase() !== DEFAULT_PRIMARY.toLowerCase()
@@ -165,6 +174,9 @@ function buildCode(c: CodeInput): string {
   if (!c.allowImport) props.push('  allowImport={false}')
   if (c.syncSnippet) props.push('  syncSnippet')
   if (c.defaultView === 'console') props.push('  defaultView="console"')
+  if (!isDefaultSnippetLanguages(c.snippetLanguages)) {
+    props.push(`  snippetLanguages={[${c.snippetLanguages.map(quote).join(', ')}]}`)
+  }
 
   const responseExamples = formatResponseExamples(c.responseExamples)
   if (responseExamples) props.push(responseExamples)
@@ -185,6 +197,7 @@ function buildEmbedConfig(c: IframeInput): ApiPlaygroundEmbedConfig {
     allowImport: c.allowImport,
     syncSnippet: c.syncSnippet,
     ...(c.defaultView ? { defaultView: c.defaultView } : {}),
+    ...(!isDefaultSnippetLanguages(c.snippetLanguages) ? { snippetLanguages: c.snippetLanguages } : {}),
     customization: c.customization,
   }
 }
@@ -215,6 +228,9 @@ export function usePlaygroundConfig() {
   const [allowImport, setAllowImport] = useState(true)
   const [syncSnippet, setSyncSnippet] = useState(false)
   const [defaultView, setDefaultView] = useState<'snippet' | 'console'>('snippet')
+  const [snippetLanguages, setSnippetLanguages] = useState<SnippetLanguage[]>([
+    ...DEFAULT_SNIPPET_LANGUAGES,
+  ])
 
   const applyPreset = (id: string) => {
     const next = PRESETS.find((p) => p.id === id) ?? PRESETS[0]
@@ -254,11 +270,12 @@ export function usePlaygroundConfig() {
         allowImport,
         syncSnippet,
         defaultView,
+        snippetLanguages,
         primary,
         background,
         bgTouched,
       }),
-    [request, title, responseExamples, widgetMode, editable, allowImport, syncSnippet, defaultView, primary, background, bgTouched],
+    [request, title, responseExamples, widgetMode, editable, allowImport, syncSnippet, defaultView, snippetLanguages, primary, background, bgTouched],
   )
 
   const iframeCode = useMemo(
@@ -272,9 +289,10 @@ export function usePlaygroundConfig() {
         allowImport,
         syncSnippet,
         defaultView,
+        snippetLanguages,
         customization,
       }),
-    [request, title, responseExamples, widgetMode, editable, allowImport, syncSnippet, defaultView, customization],
+    [request, title, responseExamples, widgetMode, editable, allowImport, syncSnippet, defaultView, snippetLanguages, customization],
   )
 
   return {
@@ -300,6 +318,8 @@ export function usePlaygroundConfig() {
     setSyncSnippet,
     defaultView,
     setDefaultView,
+    snippetLanguages,
+    setSnippetLanguages,
     customization,
     code,
     iframeCode,

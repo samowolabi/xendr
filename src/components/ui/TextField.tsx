@@ -65,7 +65,6 @@ export const TextField: React.FC<TextFieldProps> = ({
       <div
         className={cn(
           'flex items-center border border-border/35 bg-surface-2',
-          'focus-within:ring-2 focus-within:ring-primary/15',
           fieldSizes[size],
           error && 'border-red-500',
         )}

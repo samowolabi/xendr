@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Button, Card, CodeBlock, Icon } from '@/components/ui';
-import { ApiConsole } from './ApiConsole';
+import { ApiConsole, type ApiConsoleHistoryEntry } from './ApiConsole';
 import { CodePreviewCard } from './CodePreviewCard';
 import { ImportCard } from './ImportCard';
 import { PoweredBySignature } from './PoweredBySignature';
@@ -8,7 +8,12 @@ import { RequestSnippet } from './RequestSnippet';
 import { parseCurl } from '@/lib/widget/curl';
 import { formatJsonIfPossible } from '@/lib/widget/format';
 import { generateSnippet } from '@/lib/widget/snippets';
-import type { ApiPlaygroundResponseExample, SnippetLanguage, WidgetRequest } from '@/lib/widget/types';
+import type {
+  ApiPlaygroundResponseExample,
+  SnippetLanguage,
+  WidgetRequest,
+  WidgetResponse,
+} from '@/lib/widget/types';
 
 type ApiPlaygroundPanel = 'idle' | 'console' | 'import' | 'code';
 type RenderedPanel = 'snippet' | 'console' | 'import' | 'code' | 'invalid';
@@ -64,8 +69,6 @@ export interface ApiPlaygroundProps {
   syncSnippet?: boolean;
   /** Initial widget view. Use `'console'` to open directly in Try it Out. */
   defaultView?: ApiPlaygroundDefaultView;
-  /** When true, the console response area stays empty until the first send. */
-  emptyResponseUntilSend?: boolean;
   snippetLanguages?: readonly SnippetLanguage[];
   customization?: ApiPlaygroundCustomization;
 }
@@ -278,12 +281,13 @@ export const ApiPlayground: React.FC<ApiPlaygroundProps> = ({
   mode = 'dark',
   syncSnippet = false,
   defaultView = 'snippet',
-  emptyResponseUntilSend = false,
   snippetLanguages,
   customization,
 }) => {
   const resolvedMode = useResolvedMode(mode);
   const [panel, setPanel] = useState<ApiPlaygroundPanel>(defaultView === 'console' ? 'console' : 'idle');
+  const [consoleHistory, setConsoleHistory] = useState<ApiConsoleHistoryEntry[]>([]);
+  const [consoleResponse, setConsoleResponse] = useState<WidgetResponse | null>(null);
   const previousDefaultViewRef = useRef(defaultView);
 
   useEffect(() => {
@@ -370,12 +374,15 @@ export const ApiPlayground: React.FC<ApiPlaygroundProps> = ({
             <ApiConsole
               request={consoleRequest}
               onRequestChange={updateRequest}
+              history={consoleHistory}
+              onHistoryChange={setConsoleHistory}
+              selectedResponse={consoleResponse}
+              onSelectedResponseChange={setConsoleResponse}
               title={title}
               editable={editable}
               onBack={defaultView === 'console' ? undefined : () => setPanel('idle')}
               onImport={allowImport && editable ? () => setPanel('import') : undefined}
               onCodePreview={() => setPanel('code')}
-              emptyResponseUntilSend={emptyResponseUntilSend}
             />
           ) : snippetRequest ? (
             <RequestSnippet

@@ -9,7 +9,7 @@ export type {
 export { RequestSnippet } from './RequestSnippet';
 export type { RequestSnippetProps } from './RequestSnippet';
 export { ApiConsole } from './ApiConsole';
-export type { ApiConsoleProps } from './ApiConsole';
+export type { ApiConsoleHistoryEntry, ApiConsoleProps } from './ApiConsole';
 export { ImportCard } from './ImportCard';
 export { CodePreviewCard } from './CodePreviewCard';
 export type { CodePreviewCardProps } from './CodePreviewCard';

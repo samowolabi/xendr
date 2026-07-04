@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { Analytics } from '@vercel/analytics/react'
 import '@/styles/global.css'
 import { ThemeProvider } from '@/theme'
 import Embed from './pages/Embed/Embed'
@@ -30,4 +31,9 @@ const page =
     <Landing />
   )
 
-createRoot(document.getElementById('root')!).render(<StrictMode>{page}</StrictMode>)
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    {page}
+    <Analytics />
+  </StrictMode>,
+)

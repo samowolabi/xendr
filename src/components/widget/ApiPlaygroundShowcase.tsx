@@ -25,7 +25,7 @@ export function ApiPlaygroundShowcase() {
               allowImport={cfg.allowImport}
               syncSnippet={cfg.syncSnippet}
               defaultView={cfg.defaultView}
-              emptyResponseUntilSend={false}
+              snippetLanguages={cfg.snippetLanguages}
               customization={cfg.customization}
             />
           </div>

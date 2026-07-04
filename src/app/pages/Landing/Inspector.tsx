@@ -4,6 +4,8 @@ import { CodeBlock, ColorField, Icon, Select, Switch, Tabs, TextField, Tooltip }
 import type { IconName } from '@/components/ui'
 import { cn } from '@/lib/cn'
 import type { PlaygroundConfig } from './playground'
+import { SNIPPET_LANGUAGES } from '@/lib/widget/snippets'
+import type { SnippetLanguage } from '@/lib/widget/types'
 
 const accentButton =
   'flex w-full items-center rounded-md bg-primary px-3.5 py-2.5 text-primary-contrast transition hover:brightness-95 active:scale-[1.01]'
@@ -246,10 +248,45 @@ function ResponsesEditor({ cfg }: { cfg: PlaygroundConfig }) {
             spellCheck={false}
             rows={5}
             aria-label={`${active.status} response body`}
-            className="w-full resize-none rounded border border-border bg-surface p-2 font-mono text-[11px] leading-relaxed text-content focus:border-primary focus:outline-none"
+            className="w-full resize-none rounded border border-border bg-surface p-2 font-mono text-[11px] leading-relaxed text-content outline-none"
           />
         </div>
       )}
+    </div>
+  )
+}
+
+function SnippetLanguagePicker({ cfg }: { cfg: PlaygroundConfig }) {
+  const selected = new Set(cfg.snippetLanguages)
+  const toggle = (language: SnippetLanguage) => {
+    if (selected.has(language) && cfg.snippetLanguages.length === 1) return
+    const next = selected.has(language)
+      ? cfg.snippetLanguages.filter((item) => item !== language)
+      : [...cfg.snippetLanguages, language]
+    cfg.setSnippetLanguages(next)
+  }
+
+  return (
+    <div className="grid grid-cols-2 gap-1.5">
+      {SNIPPET_LANGUAGES.map((language) => {
+        const active = selected.has(language.id)
+        return (
+          <button
+            key={language.id}
+            type="button"
+            aria-pressed={active}
+            onClick={() => toggle(language.id)}
+            className={cn(
+              'min-h-8 rounded-md border px-2 text-left text-[12px] font-medium transition-colors',
+              active
+                ? 'border-primary bg-primary-soft text-content'
+                : 'border-border bg-surface text-muted hover:text-content',
+            )}
+          >
+            {language.label}
+          </button>
+        )
+      })}
     </div>
   )
 }
@@ -299,7 +336,7 @@ function Controls({ cfg, onEmbed }: { cfg: PlaygroundConfig; onEmbed: () => void
             onChange={(e) => cfg.setRequest(e.target.value)}
             spellCheck={false}
             rows={6}
-            className="w-full resize-none rounded-md border border-border bg-surface-2 p-2.5 font-mono text-[12px] leading-relaxed text-content focus:border-primary focus:outline-none"
+            className="w-full resize-none rounded-md border border-border bg-surface-2 p-2.5 font-mono text-[12px] leading-relaxed text-content outline-none"
           />
         </div>
       </Section>
@@ -374,6 +411,19 @@ function Controls({ cfg, onEmbed }: { cfg: PlaygroundConfig; onEmbed: () => void
             checked={cfg.defaultView === 'console'}
             onChange={(checked) => cfg.setDefaultView(checked ? 'console' : 'snippet')}
           />
+        </Row>
+        <Row
+          icon="code"
+          label="Languages"
+          align="start"
+          hint={{
+            text: 'Controls which programming language snippets appear, preserving this order.',
+            configKey: 'snippetLanguages',
+          }}
+        >
+          <div className="w-full max-w-[210px]">
+            <SnippetLanguagePicker cfg={cfg} />
+          </div>
         </Row>
       </Section>
     </>

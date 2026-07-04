@@ -1,69 +1,20 @@
 {
-  "name": "@xendr/react",
-  "version": "0.1.10",
+  "name": "xendr",
+  "private": true,
   "type": "module",
-  "description": "Lightweight embeddable React API playground for interactive API docs, cURL snippets, try-it-out requests, and developer portals.",
-  "keywords": [
-    "xendr",
-    "react api playground",
-    "api playground",
-    "api client",
-    "api console",
-    "api explorer",
-    "try it out",
-    "interactive api docs",
-    "developer portal",
-    "api documentation",
-    "curl",
-    "curl parser",
-    "request playground",
-    "react api client",
-    "react component",
-    "http client",
-    "rest api",
-    "api testing"
+  "workspaces": [
+    "apps/*",
+    "packages/*"
   ],
-  "homepage": "https://www.xendr.dev",
-  "license": "MIT",
-  "sideEffects": [
-    "**/*.css",
-    "./dist/index.js",
-    "./dist/index.cjs"
-  ],
-  "files": [
-    "dist"
-  ],
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/src/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/src/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
-    "./styles.css": "./dist/styles.css"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
-    "dev": "vite",
-    "build": "npm run build:lib",
-    "build:site": "npm run build:app",
-    "build:app": "tsc -b && vite build",
-    "build:lib": "vite build --config vite.lib.config.ts && npm run build:css && npm run build:inject-css",
-    "build:css": "tailwindcss -i ./src/styles/package.css -o ./dist/styles.css --minify",
-    "build:inject-css": "node scripts/embed-css.mjs",
-    "check": "npm run lint && npm run build:lib && npm run build:site",
+    "dev": "npm run dev -w apps/www",
+    "build": "npm run build -w packages/react",
+    "build:site": "npm run build -w apps/www",
+    "build:app": "npm run build -w apps/www",
+    "check": "npm run lint && npm run build -w packages/react && npm run build -w apps/www",
     "lint": "oxlint",
-    "pack:dry": "npm run build:lib && npm pack --dry-run",
-    "prepublishOnly": "npm run check",
-    "preview": "vite preview"
-  },
-  "peerDependencies": {
-    "react": ">=18",
-    "react-dom": ">=18"
+    "pack:dry": "npm run build -w packages/react && npm pack -w packages/react --dry-run",
+    "preview": "npm run preview -w apps/www"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.1",
@@ -71,7 +22,6 @@
     "@types/node": "^24.13.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@vercel/analytics": "^2.0.1",
     "@vitejs/plugin-react": "^6.0.2",
     "oxlint": "^1.69.0",
     "react": "^19.2.7",
@@ -80,12 +30,5 @@
     "typescript": "~6.0.2",
     "vite": "^8.1.0",
     "vite-plugin-dts": "^4.5.4"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/samowolabi/xendr.git"
-  },
-  "bugs": {
-    "url": "https://github.com/samowolabi/xendr/issues"
   }
 }

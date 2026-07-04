@@ -8,7 +8,8 @@ export default defineConfig({
   base: '/',
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@': fileURLToPath(new URL('../../packages/react/src', import.meta.url)),
+      '@app': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
   plugins: [
@@ -16,6 +17,7 @@ export default defineConfig({
     tailwindcss()
   ],
   build: {
-    outDir: 'dist-app',
+    outDir: '../../dist-app',
+    emptyOutDir: true,
   },
 })

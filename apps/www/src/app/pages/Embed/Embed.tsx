@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { ApiPlayground } from '@/components/widget';
-import { DEFAULT_EMBED_CONFIG, decodeEmbedConfig } from '@/app/embedConfig';
+import { DEFAULT_EMBED_CONFIG, decodeEmbedConfig } from '@app/app/embedConfig';
 import './Embed.css';
 
 const InvalidEmbed = () => (

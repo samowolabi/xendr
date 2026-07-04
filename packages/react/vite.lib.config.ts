@@ -25,7 +25,6 @@ export default defineConfig({
         'src/lib/**',
         'src/types/**',
       ],
-      exclude: ['src/components/widget/ApiPlaygroundShowcase.tsx'],
     }),
   ],
   build: {

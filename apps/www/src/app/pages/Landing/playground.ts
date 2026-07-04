@@ -5,7 +5,7 @@ import type {
   ApiPlaygroundResponseExample,
   SnippetLanguage,
 } from '@/components/widget'
-import { embedUrl, type ApiPlaygroundEmbedConfig } from '@/app/embedConfig'
+import { embedUrl, type ApiPlaygroundEmbedConfig } from '@app/app/embedConfig'
 import { DEFAULT_SNIPPET_LANGUAGES } from '@/lib/widget/snippets'
 
 export interface Preset {

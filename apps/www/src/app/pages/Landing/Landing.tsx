@@ -1,4 +1,4 @@
-import { ApiPlaygroundShowcase } from '@/components/widget/ApiPlaygroundShowcase'
+import { ApiPlaygroundShowcase } from './ApiPlaygroundShowcase'
 import './Landing.css'
 
 /**

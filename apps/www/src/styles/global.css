@@ -1,5 +1,9 @@
 @import "tailwindcss";
-@import "./theme.css";
+@import "../../../../packages/react/src/styles/theme.css";
+
+@source "../app";
+@source "../../../../packages/react/src/components";
+@source "../../../../packages/react/src/lib";
 
 /* ── PP Neue Montreal ─────────────────────────────────────────────────────── */
 @font-face {

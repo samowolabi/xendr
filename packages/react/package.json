@@ -1,0 +1,71 @@
+{
+  "name": "@xendr/react",
+  "version": "0.1.11",
+  "type": "module",
+  "description": "Lightweight embeddable React API playground for interactive API docs, cURL snippets, try-it-out requests, and developer portals.",
+  "keywords": [
+    "xendr",
+    "react api playground",
+    "api playground",
+    "api client",
+    "api console",
+    "api explorer",
+    "try it out",
+    "interactive api docs",
+    "developer portal",
+    "api documentation",
+    "curl",
+    "curl parser",
+    "request playground",
+    "react api client",
+    "react component",
+    "http client",
+    "rest api",
+    "api testing"
+  ],
+  "homepage": "https://www.xendr.dev",
+  "license": "MIT",
+  "sideEffects": [
+    "**/*.css",
+    "./dist/index.js",
+    "./dist/index.cjs"
+  ],
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "npm run build:lib",
+    "build:lib": "vite build --config vite.lib.config.ts && npm run build:css && npm run build:inject-css",
+    "build:css": "tailwindcss -i ./src/styles/package.css -o ./dist/styles.css --minify",
+    "build:inject-css": "node scripts/embed-css.mjs",
+    "check": "npm run build",
+    "pack:dry": "npm run build && npm pack --dry-run",
+    "prepublishOnly": "npm run check"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samowolabi/xendr.git",
+    "directory": "packages/react"
+  },
+  "bugs": {
+    "url": "https://github.com/samowolabi/xendr/issues"
+  }
+}

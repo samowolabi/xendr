@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "../../node_modules/.tmp/apps-www.tsbuildinfo",
+    "baseUrl": ".",
+    "paths": {
+      "@xendr/react": ["../../packages/react/src/index.ts"],
+      "@/*": ["../../packages/react/src/*"],
+      "@pkg/*": ["../../packages/react/src/*"],
+      "@app/*": ["src/*"]
+    }
+  },
+  "include": ["src", "../../packages/react/src"]
+}

@@ -1,7 +1,7 @@
-import { ApiPlayground } from './ApiPlayground'
-import { Inspector } from '@/app/pages/Landing/Inspector'
-import { usePlaygroundConfig } from '@/app/pages/Landing/playground'
-import { XendrLogo } from './XendrLogo'
+import { ApiPlayground } from '@xendr/react'
+import { XendrLogo } from '@pkg/components/widget/XendrLogo'
+import { Inspector } from './Inspector'
+import { usePlaygroundConfig } from './playground'
 
 /**
  * Full playground shell: live widget on the left, control inspector on the

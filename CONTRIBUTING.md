@@ -24,12 +24,13 @@ npm run check
 
 ## Project Structure
 
-- `src/components/widget`: npm package components.
-- `src/lib/widget`: parser, request, snippet, and execution logic.
-- `src/app`: website and hosted playground only.
-- `src/styles`: shared package and site styles.
+- `packages/react/src/components/widget`: npm package components.
+- `packages/react/src/lib/widget`: parser, request, snippet, and execution logic.
+- `apps/www/src/app`: website and hosted playground only.
+- `packages/react/src/styles`: package styles and shared theme tokens.
+- `apps/www/src/styles`: website shell styles.
 
-Keep package code independent from `src/app`. Website and playground internals should not be exported from `@xendr/react`.
+Keep package code independent from `apps/www`. Website and playground internals should not be exported from `@xendr/react`.
 
 ## Pull Requests
 

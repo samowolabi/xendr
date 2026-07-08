@@ -76,6 +76,37 @@ export const EMBED_IFRAME_TABS = [
   },
 ] as const
 
+export const EMBED_VUE_TABS = [
+  {
+    id: 'vue',
+    label: 'Vue',
+    code: `<template>
+  <iframe
+    src="https://www.xendr.dev/embed?c=YOUR_CONFIG"
+    width="100%"
+    height="720"
+    style="border: 0; border-radius: 16px;"
+    loading="lazy"
+  />
+</template>`,
+  },
+] as const
+
+export const EMBED_MINTLIFY_TABS = [
+  {
+    id: 'mintlify',
+    label: 'Mintlify',
+    code: `<Frame>
+  <iframe
+    src="https://www.xendr.dev/embed?c=YOUR_CONFIG"
+    width="100%"
+    height="720"
+    style={{ border: 0, borderRadius: 16 }}
+  />
+</Frame>`,
+  },
+] as const
+
 export const embedLink =
   'mt-3 inline-flex w-fit items-center gap-2 text-xs text-[#9ece6a] transition-[gap] hover:gap-3'
 

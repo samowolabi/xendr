@@ -17,6 +17,8 @@ export type IconName =
   | 'chevron-down'
   | 'trash'
   | 'plus'
+  | 'plus-solid'
+  | 'minus-solid'
   | 'moon'
   | 'sun'
   | 'palette'
@@ -185,6 +187,9 @@ const registry: Record<IconName, React.ReactNode> = {
       <path strokeLinecap="round" d="M15 12h-3m0 0H9m3 0V9m0 3v3" />
     </g>
   ),
+  // Material Symbols add/remove (Apache-2.0) — solid glyphs for toggles.
+  'plus-solid': <path fill="currentColor" d="M19 12.998h-6v6h-2v-6H5v-2h6v-6h2v6h6z" />,
+  'minus-solid': <path fill="currentColor" d="M19 13H5v-2h14z" />,
   moon: (
     <path
       fill="currentColor"

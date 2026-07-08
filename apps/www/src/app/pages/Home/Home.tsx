@@ -6,7 +6,9 @@ import { DotGridCanvas } from '../../components/DotGridCanvas'
 import { SiteNav } from '../../components/SiteNav'
 import {
   EMBED_IFRAME_TABS,
+  EMBED_MINTLIFY_TABS,
   EMBED_REACT_TABS,
+  EMBED_VUE_TABS,
   FAQS,
   FEATURES,
   GITHUB_URL,
@@ -85,6 +87,42 @@ function CodeCard({ tabs }: { tabs: readonly { id: string; label: string; code: 
   )
 }
 
+function IntegrationIcon({ src, alt, className = '' }: { src: string; alt: string; className?: string }) {
+  return (
+    <span className="grid h-9 w-9 place-items-center rounded-lg border border-white/10 bg-white/[0.06]">
+      <img src={src} alt={alt} className={`max-h-5 max-w-5 object-contain ${className}`} />
+    </span>
+  )
+}
+
+/** FAQ row. React-controlled (not native <details>) so the content stays in the
+ *  DOM and the height transition actually animates on open/close. */
+function FaqItem({ question, answer }: { question: string; answer: string }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-expanded={open}
+        className="flex w-full cursor-pointer items-center justify-between gap-5 px-5 py-5 text-left text-sm font-medium text-ink"
+      >
+        <span>{question}</span>
+        <span className={`shrink-0 transition-colors ${open ? 'text-brand-deep' : 'text-muted'}`}>
+          <Icon name={open ? 'minus-solid' : 'plus-solid'} className="h-4 w-4" />
+        </span>
+      </button>
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-out ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+      >
+        <div className="overflow-hidden">
+          <p className="max-w-[62ch] px-5 pb-5 text-sm text-muted">{answer}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function Home() {
   const navigate = useNavigate()
   return (
@@ -128,7 +166,7 @@ function Home() {
           </section>
 
           <section id="showcase" className="relative z-10 pt-6 pb-6">
-            <div className="mx-auto max-w-[1270px] h-[80vh] lg:h-[88vh] px-6">
+            <div className="mx-auto max-w-[1270px] px-6 lg:h-[88vh]">
               <ApiPlaygroundShowcase embedded />
             </div>
           </section>
@@ -172,8 +210,101 @@ function Home() {
           </div>
         </section>
 
+
+        {/* ── Embed section (React / iframe / Mintlify) ─────────────────── */}
+        <section id="embed" className="mt-20 lg:mt-36 bg-[#101015] text-white">
+          <div className="mx-auto max-w-[1270px] px-6">
+            {/* Header band. */}
+            <div className="border-b border-white/10 pt-20 pb-14 max-[900px]:py-14">
+              <h2 className="max-w-[450px] text-balance text-[clamp(28px,3.1vw,40px)] font-medium leading-[1.12] tracking-[-0.02em] text-white">
+                Embed the API tester wherever your docs live
+              </h2>
+              <p className="max-w-[46ch] text-sm text-white/55">
+                Use the React package, paste an iframe, wrap it inside Mintlify, or embed it in Vue docs.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 max-[760px]:grid-cols-1">
+              <div className="border-r border-b border-white/10 py-14 pr-10 max-[760px]:border-r-0 max-[760px]:py-10 max-[760px]:pr-0">
+                <div className="mb-5 flex items-center gap-3">
+                  <IntegrationIcon src="/integrations/react-logo.svg" alt="React logo" />
+                  <span className="text-sm font-medium text-white">React</span>
+                </div>
+                <p className="max-w-[46ch] lg:text-sm text-white/55">
+                  <span className="font-medium text-white">React component.</span> Install the
+                  package and render the API tester wherever your docs live.
+                </p>
+                <div className="mt-8">
+                  <CodeCard tabs={EMBED_REACT_TABS} />
+                </div>
+                <a
+                  className={embedLink}
+                  href={`${GITHUB_URL}#readme`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View the docs <Icon name="arrow-right" className="h-4 w-4" />
+                </a>
+              </div>
+              <div className="border-b border-white/10 py-14 pl-10 max-[760px]:pl-0 max-[760px]:py-10">
+                <div className="mb-5 flex items-center gap-3">
+                  <IntegrationIcon src="/integrations/mintlify-logo.svg" alt="Mintlify logo" className="max-w-6" />
+                  <span className="text-sm font-medium text-white">Mintlify</span>
+                </div>
+                <p className="max-w-[46ch] lg:text-sm text-white/55">
+                  <span className="font-medium text-white">Mintlify docs.</span> Generate the iframe
+                  code in the API playground, then place it inside a Frame.
+                </p>
+                <div className="mt-8">
+                  <CodeCard tabs={EMBED_MINTLIFY_TABS} />
+                </div>
+                <Link className={embedLink} to="/playground">
+                  Get iframe code in the playground <Icon name="arrow-right" className="h-4 w-4" />
+                </Link>
+              </div>
+              <div className="border-r border-white/10 py-14 pr-10 max-[760px]:border-b max-[760px]:border-r-0 max-[760px]:py-10 max-[760px]:pr-0">
+                <div className="mb-5 flex items-center gap-3">
+                  <IntegrationIcon src="/integrations/vue-logo.svg" alt="Vue logo" />
+                  <span className="text-sm font-medium text-white">Vue</span>
+                </div>
+                <p className="max-w-[46ch] lg:text-sm text-white/55">
+                  <span className="font-medium text-white">Vue docs.</span> Use the generated iframe
+                  embed inside your Vue templates or documentation pages.
+                </p>
+                <div className="mt-8">
+                  <CodeCard tabs={EMBED_VUE_TABS} />
+                </div>
+                <Link className={embedLink} to="/playground">
+                  Generate iframe code <Icon name="arrow-right" className="h-4 w-4" />
+                </Link>
+              </div>
+              <div className="py-14 pl-10 max-[760px]:py-10 max-[760px]:pl-0">
+                <div className="mb-5 flex items-center gap-3">
+                  <IntegrationIcon src="/logo/png/xendr-logo-icon.png" alt="Xendr logo" />
+                  <span className="text-sm font-medium text-white">iframe</span>
+                </div>
+                <p className="max-w-[46ch] lg:text-sm text-white/55">
+                  <span className="font-medium text-white">Plain iframe.</span> Works on any site,
+                  paste one snippet with your tester settings encoded in the URL.
+                </p>
+                <div className="mt-8">
+                  <CodeCard tabs={EMBED_IFRAME_TABS} />
+                </div>
+                <p className="mt-3 max-w-[46ch] text-xs text-white/45">
+                  If your site uses a Content Security Policy, whitelist https://www.xendr.dev in
+                  your frame-src directive.
+                </p>
+                <Link className={embedLink} to="/playground">
+                  Generate yours in the playground <Icon name="arrow-right" className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
         {/* ── Features (bento) — dark band ──────────────────────────────── */}
-        <section id="features" className="mt-20 lg:mt-36 bg-[#101015] text-white">
+        <section id="features" className="bg-[#15151b] text-white">
           <div className="mx-auto max-w-[1270px] px-6">
             {/* Header band. */}
             <div className="pt-20 max-[900px]:pt-14">
@@ -197,14 +328,23 @@ function Home() {
                       {feature.title} <span className="font-medium text-white/45">{feature.titleMuted}</span>
                     </h3>
                   </div>
-                  <div className="mt-6 lg:mt-8 flex flex-1 items-center justify-center overflow-hidden rounded-tl-xl">
-                    <img
-                      src={feature.image}
-                      alt={`Xendr ${feature.title} preview`}
-                      className="h-full w-full object-cover object-left-top"
-                      loading="lazy"
-                      decoding="async"
-                    />
+                  {/* Screenshot framed as a Mac window (traffic lights), matching
+                      the embed section's CodeCard. */}
+                  <div className="mt-6 lg:mt-8 flex flex-1 flex-col overflow-hidden rounded-tl-xl border-l border-t border-white/10 bg-[#14151a]">
+                    <div className="flex shrink-0 items-center gap-2 border-b border-white/10 px-4 py-3" aria-hidden="true">
+                      {[0, 1, 2].map((i) => (
+                        <span key={i} className="h-3 w-3 rounded-full border border-white/10 bg-white/5" />
+                      ))}
+                    </div>
+                    <div className="min-h-0 flex-1 pl-3 pt-3 lg:pl-4 lg:pt-4">
+                      <img
+                        src={feature.image}
+                        alt={`Xendr ${feature.title} preview`}
+                        className="h-full w-full rounded-tl-lg object-cover object-left-top"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
                   </div>
                 </article>
               ))}
@@ -212,53 +352,6 @@ function Home() {
           </div>
         </section>
 
-        {/* ── Embed section (React / iframe) — dark band ────────────────── */}
-        <section id="embed" className="bg-[#15151b] text-white">
-          <div className="mx-auto max-w-[1270px] px-6">
-            {/* Header band. */}
-            <div className="border-b border-white/10 pt-20 pb-14 max-[900px]:py-14">
-              <h2 className="max-w-[450px] text-balance text-[clamp(28px,3.1vw,40px)] font-medium leading-[1.12] tracking-[-0.02em] text-white">
-                Embed the API tester your way, React or an iframe
-              </h2>
-              <p className="max-w-[40ch] text-sm text-white/55">
-                Add Xendr to documentation, websites, or guides in minutes, whichever stack they run on.
-              </p>
-            </div>
-
-            {/* Two embed paths, divided like the header band. */}
-            <div className="grid grid-cols-2 max-[900px]:grid-cols-1">
-              <div className="border-r border-white/10 py-14 pr-12 max-[900px]:border-b max-[900px]:border-r-0 max-[900px]:py-10 max-[900px]:pr-0">
-                <p className="max-w-[46ch] lg:text-sm text-white/55">
-                  <span className="font-medium text-white">React component.</span> Install the
-                  package and render the API tester wherever your docs live.
-                </p>
-                <div className="mt-8">
-                  <CodeCard tabs={EMBED_REACT_TABS} />
-                </div>
-                <a
-                  className={embedLink}
-                  href={`${GITHUB_URL}#readme`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  View the docs <Icon name="arrow-right" className="h-4 w-4" />
-                </a>
-              </div>
-              <div className="py-14 pl-12 max-[900px]:py-10 max-[900px]:pl-0">
-                <p className="max-w-[46ch] lg:text-sm text-white/55">
-                  <span className="font-medium text-white">Plain iframe.</span> Works on any site,
-                  paste one snippet with your tester settings encoded in the URL.
-                </p>
-                <div className="mt-8">
-                  <CodeCard tabs={EMBED_IFRAME_TABS} />
-                </div>
-                <Link className={embedLink} to="/playground">
-                  Generate yours in the playground <Icon name="arrow-right" className="h-4 w-4" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* ── Company story ─────────────────────────────────────────────── */}
         <section id="story" className="pt-20 lg:pt-30 pb-30">
@@ -270,7 +363,7 @@ function Home() {
               </h2>
               <div className="mt-auto pt-16 max-[900px]:pt-10">
                 <div className="mt-10 flex flex-col">
-                  <span className="font-medium text-ink">Samuel Owolabi</span>
+                  <span className="text-lg lg:text-base font-medium text-ink">Samuel Owolabi</span>
                   <span className="text-sm text-muted">Creator - RagRails</span>
                 </div>
               </div>
@@ -311,15 +404,7 @@ function Home() {
 
             <div className="divide-y divide-line rounded-2xl border border-line bg-white">
               {FAQS.map((item) => (
-                <details key={item.question} className="group">
-                  <summary className="flex w-full cursor-pointer list-none items-center justify-between gap-5 px-5 py-5 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
-                    <span>{item.question}</span>
-                    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#f2f4f5] text-muted transition-colors group-open:text-brand-deep">
-                      <Icon name="plus" className="h-4 w-4 transition-transform group-open:rotate-45" />
-                    </span>
-                  </summary>
-                  <p className="max-w-[62ch] px-5 pb-5 text-sm text-muted">{item.answer}</p>
-                </details>
+                <FaqItem key={item.question} question={item.question} answer={item.answer} />
               ))}
             </div>
           </div>

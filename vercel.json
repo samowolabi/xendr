@@ -2,7 +2,53 @@
   "buildCommand": "npm run build:site",
   "outputDirectory": "dist-app",
   "framework": "vite",
+  "headers": [
+    {
+      "source": "/",
+      "headers": [
+        {
+          "key": "Link",
+          "value": "</sitemap.xml>; rel=\"sitemap\"; type=\"application/xml\", <https://github.com/samowolabi/xendr#readme>; rel=\"service-doc\"; type=\"text/html\", <https://www.npmjs.com/package/@xendr/react>; rel=\"describedby\"; type=\"text/html\""
+        },
+        {
+          "key": "Vary",
+          "value": "Accept"
+        }
+      ]
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept",
+          "value": ".*text/markdown.*"
+        }
+      ],
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/markdown; charset=utf-8"
+        },
+        {
+          "key": "x-markdown-tokens",
+          "value": "773"
+        }
+      ]
+    }
+  ],
   "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept",
+          "value": ".*text/markdown.*"
+        }
+      ],
+      "destination": "/index.md"
+    },
     {
       "source": "/(.*)",
       "destination": "/"

@@ -1,5 +1,5 @@
-import React, { useEffect, useLayoutEffect, useRef, useState, useMemo } from 'react';
-import { Button, Card, CodeBlock, Icon, Select, Tabs } from '@/components/ui';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Button, Card, CodeBlock, FluidHeight, Icon, Select, Tabs } from '@/components/ui';
 import { formatJsonIfPossible } from '@/lib/widget/format';
 import {
   generateSnippet,
@@ -19,9 +19,6 @@ export interface RequestSnippetProps {
 }
 
 const VISIBLE_LANGUAGE_COUNT = 4;
-const CODE_HEIGHT_TRANSITION_MS = 240;
-const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
-
 function responseLanguage(body: string): CodeLanguage {
   try {
     JSON.parse(body);
@@ -30,82 +27,6 @@ function responseLanguage(body: string): CodeLanguage {
     return 'plain';
   }
 }
-
-const CodeHeightTransition: React.FC<{
-  transitionKey: string;
-  children: React.ReactNode;
-}> = ({ transitionKey, children }) => {
-  const outerRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
-  const previousKeyRef = useRef(transitionKey);
-  const lastHeightRef = useRef<number | null>(null);
-  const [height, setHeight] = useState<number | null>(null);
-  const [isClipped, setIsClipped] = useState(false);
-
-  useIsomorphicLayoutEffect(() => {
-    const outer = outerRef.current;
-    const inner = innerRef.current;
-    if (!outer || !inner) return;
-
-    if (previousKeyRef.current === transitionKey) {
-      lastHeightRef.current = inner.getBoundingClientRect().height;
-      return;
-    }
-
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const startHeight = lastHeightRef.current ?? outer.getBoundingClientRect().height;
-    const endHeight = inner.getBoundingClientRect().height;
-    previousKeyRef.current = transitionKey;
-    lastHeightRef.current = endHeight;
-
-    if (reduceMotion || Math.abs(startHeight - endHeight) < 1) {
-      setHeight(null);
-      setIsClipped(false);
-      return;
-    }
-
-    setIsClipped(true);
-    setHeight(startHeight);
-
-    const frame = window.requestAnimationFrame(() => {
-      outer.getBoundingClientRect();
-      setHeight(endHeight);
-    });
-    const timeout = window.setTimeout(() => {
-      setHeight(null);
-      setIsClipped(false);
-    }, CODE_HEIGHT_TRANSITION_MS);
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.clearTimeout(timeout);
-    };
-  }, [transitionKey]);
-
-  useEffect(() => {
-    const inner = innerRef.current;
-    if (!inner || typeof ResizeObserver === 'undefined') return;
-
-    const observer = new ResizeObserver(([entry]) => {
-      lastHeightRef.current = entry.contentRect.height;
-    });
-    observer.observe(inner);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={outerRef}
-      className="w-full transition-[height] duration-[240ms] ease-out"
-      style={{
-        height: height === null ? undefined : `${height}px`,
-        overflow: isClipped ? 'hidden' : undefined,
-      }}
-    >
-      <div ref={innerRef} className="w-full">{children}</div>
-    </div>
-  );
-};
 
 /**
  * Documentation view of a request: language-tabbed code snippet with a
@@ -155,6 +76,14 @@ export const RequestSnippet: React.FC<RequestSnippetProps> = ({
   const visibleItems = useMemo(() => snippetLanguageItems(visibleLanguages), [visibleLanguages]);
   const overflowItems = useMemo(() => snippetLanguageItems(overflowLanguages), [overflowLanguages]);
   const moreValue = overflowLanguages.includes(activeLanguage) ? activeLanguage : overflowLanguages[0];
+  const mobilePrimaryLanguage = useMemo<SnippetLanguage>(() => (languages.includes('curl') ? 'curl' : languages[0]), [languages]);
+  const mobileOverflowLanguages = useMemo(
+    () => languages.filter((language) => language !== mobilePrimaryLanguage),
+    [languages, mobilePrimaryLanguage],
+  );
+  const mobilePrimaryItems = useMemo(() => snippetLanguageItems([mobilePrimaryLanguage]), [mobilePrimaryLanguage]);
+  const mobileOverflowItems = useMemo(() => snippetLanguageItems(mobileOverflowLanguages), [mobileOverflowLanguages]);
+  const mobileMoreValue = mobileOverflowLanguages.includes(activeLanguage) ? activeLanguage : mobileOverflowLanguages[0];
   const showTryButton = Boolean(onTryItOut);
 
   useEffect(() => {
@@ -172,8 +101,8 @@ export const RequestSnippet: React.FC<RequestSnippetProps> = ({
   return (
     <div className="w-full space-y-3">
       <Card>
-        <div className="relative flex items-center justify-between">
-          <div className="flex min-w-0 items-center gap-2">
+        <div className="relative flex items-center justify-between gap-2">
+          <div className="hidden min-w-0 items-center gap-2 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] sm:flex [&::-webkit-scrollbar]:hidden">
             <Tabs
               items={visibleItems}
               activeId={visibleLanguages.includes(activeLanguage) ? activeLanguage : ''}
@@ -191,6 +120,24 @@ export const RequestSnippet: React.FC<RequestSnippetProps> = ({
               />
             )}
           </div>
+          <div className="flex min-w-0 items-center gap-2 sm:hidden">
+            <Tabs
+              items={mobilePrimaryItems}
+              activeId={activeLanguage === mobilePrimaryLanguage ? activeLanguage : ''}
+              onChange={selectLanguage}
+              className="[&_button]:text-[13px]"
+            />
+            {mobileOverflowLanguages.length > 0 && (
+              <Select
+                value={mobileMoreValue}
+                onChange={setLang}
+                items={mobileOverflowItems}
+                size="sm"
+                triggerLabel={mobileOverflowLanguages.includes(activeLanguage) ? undefined : 'More'}
+                minWidthClassName="min-w-28"
+              />
+            )}
+          </div>
           {showTryButton && (
             <Button
               size="sm"
@@ -203,9 +150,9 @@ export const RequestSnippet: React.FC<RequestSnippetProps> = ({
           )}
         </div>
         <div className="mt-4">
-          <CodeHeightTransition transitionKey={activeLanguage}>
+          <FluidHeight watchKey={activeLanguage}>
             <CodeBlock code={code} language={highlightFor(activeLanguage)} showLineNumbers className="[&_*]:text-[13px]" />
-          </CodeHeightTransition>
+          </FluidHeight>
         </div>
       </Card>
 

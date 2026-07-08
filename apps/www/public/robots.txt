@@ -1,0 +1,10 @@
+# robots.txt for https://www.xendr.dev
+# https://www.rfc-editor.org/rfc/rfc9309
+
+User-agent: *
+Allow: /
+Disallow: /embed
+Disallow: /preview
+Disallow: /preview/
+
+Sitemap: https://www.xendr.dev/sitemap.xml

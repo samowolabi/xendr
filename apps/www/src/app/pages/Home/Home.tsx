@@ -103,7 +103,7 @@ function Home() {
               <h1 className="max-w-[20ch] text-balance  font-medium leading-[1.04] tracking-[-0.03em] text-ink my-0">
                 The fastest way for your developers to test your API.
               </h1>
-              <p className="max-w-[60ch] text-sm text-muted mt-3">
+              <p className="max-w-[60ch] text-sm text-black/75 mt-3">
                 Xendr is a lightweight API tester for developer documentation, websites, and guides.
                 Users can run requests where they read them, without copying cURL into Postman,
                 Swagger, or Hoppscotch.
@@ -264,14 +264,14 @@ function Home() {
         <section id="story" className="pt-20 lg:pt-30 pb-30">
           <div className="mx-auto grid max-w-[1270px] grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] items-stretch gap-14 px-6 max-[900px]:grid-cols-1 max-[900px]:gap-8">
             <div className="flex flex-col">
-              <h2 className={'text-2xl font-medium leading-[1.12] tracking-[-0.02em] text-ink text-balance'}>
+              <h2 className={'text-2xl lg:text-3xl font-medium tracking-[-0.02em] text-ink text-balance'}>
                 &ldquo;With Xendr embedded in our docs, we were able to onboard developers faster and
                 get them using our product.&rdquo;
               </h2>
               <div className="mt-auto pt-16 max-[900px]:pt-10">
                 <div className="mt-10 flex flex-col">
                   <span className="font-medium text-ink">Samuel Owolabi</span>
-                  <span className="text-xs text-muted">Creator - RagRails</span>
+                  <span className="text-sm text-muted">Creator - RagRails</span>
                 </div>
               </div>
             </div>

@@ -1,6 +1,8 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/cn';
 
+const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
 export interface TabItem {
   id: string;
   label: React.ReactNode;
@@ -30,8 +32,8 @@ export const Tabs: React.FC<TabsProps> = ({
   const [rect, setRect] = useState({ left: 0, top: 0, width: 0, height: 0 });
 
   // Track the active tab's geometry so the indicator can slide to it.
-  // useLayoutEffect runs before paint, so the indicator never flashes.
-  useLayoutEffect(() => {
+  // Runs before paint in the browser, and falls back to useEffect during SSR.
+  useIsomorphicLayoutEffect(() => {
     const el = btnRefs.current[activeId];
     setRect(
       el

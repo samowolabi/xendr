@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ApiPlayground } from '@xendr/react'
-import { XendrLogo } from '@pkg/components/widget/XendrLogo'
 import { Icon, Tabs } from '@pkg/components/ui'
 import { DotGridCanvas } from '../../components/DotGridCanvas'
 import { Inspector } from './Inspector'
@@ -17,6 +16,11 @@ interface ApiPlaygroundShowcaseProps {
    */
   embedded?: boolean
 }
+
+const LOGO_SRC_BY_THEME = {
+  dark: 'https://www.xendr.dev/logo/svg/xendr-white-dark-bg.svg',
+  light: 'https://www.xendr.dev/logo/svg/xendr-black-light-bg.svg',
+} as const
 
 /**
  * Full playground shell: live widget on the left, control inspector on the
@@ -67,7 +71,7 @@ export function ApiPlaygroundShowcase({ embedded = false }: ApiPlaygroundShowcas
             <div className="pg-canvas-footer">
               <Link to="/">
                 <span>Powered by</span>
-                <XendrLogo className="h-2.5 w-auto" variant={theme === 'dark' ? 'light' : 'dark'} />
+                <img src={LOGO_SRC_BY_THEME[theme]} alt="Xendr" className="h-2.5 w-auto" />
               </Link>
               <span data-separator aria-hidden="true" />
               <button
